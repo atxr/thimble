@@ -9,8 +9,8 @@ CCFLAGS = -Wall -Wwrite-strings -ansi -pedantic -O2
 
 # Local stuff for compilation
 INCLUDEFLAGS = -I./include/
-LIBRARYFLAGS= -L./
-LINKFLAGS = -l$(LIBRARY) -lm
+LIBRARYFLAGS= -L./lib
+LINKFLAGS = -l$(LIBRARY) -lfjfx -lfrfxll -lm
 
 # Global directories for installation
 INCDIR = /usr/local/include/
@@ -29,7 +29,7 @@ OBJS = $(SRCS:.cpp=.o)
 BINS = $(BSRC:.cpp=)
 
 all:	$(OBJS) $(BOBJS)
-	ar rcs lib$(LIBRARY).a $(OBJS)
+	ar rcs lib/lib$(LIBRARY).a $(OBJS)
 	make binaries
 
 .cpp.o:
@@ -60,7 +60,7 @@ uninstall:
 
 clean:
 	rm -f $(OBJS)
-	rm -f lib$(LIBRARY).a
+	rm -f lib/lib$(LIBRARY).a
 	rm -f $(BINS)
 	rm -f ./include/*~
 	rm -f ./include/thimble/*~

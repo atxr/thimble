@@ -39,6 +39,7 @@
 #include <thimble/math/AffineTransform.h>
 #include <thimble/image/Orientation.h>
 #include <thimble/finger/MinutiaeRecord.h>
+#include <thimble/finger/FJFXFingerprint.h>
 
 /**
  * @brief The library's namespace.
