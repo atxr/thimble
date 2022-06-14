@@ -65,6 +65,56 @@ namespace thimble {
 
 	public:
 
+    /**
+    * @brief
+    *            Choose a subset of specified size from a finite field.
+    *
+    * @details
+    *            The method selects <code>n</code> elements from
+    *            <code>gf</code> and stores them successively in
+    *            <code>x</code>. Before the <code>i</code>-th element
+    *            is updated, it is checked whether it is already contained
+    *            in the list. If <code>true</code> another <code>i</code>-th
+    *            element is selected.
+    *            <br><br>
+    *            As a consequence, this method assumes that the size of the
+    *            finite field specified by <code>gf</code> is larger than
+    *            (or equals) <code>n</code>.
+    *            <br><br>
+    *            If <code>tryRandom</code> is <code>true</code> the method
+    *            is advised to use a random generator with more entropy;
+    *            otherwise, it wraps around the standard <code>rand()</code>
+    *            function.
+    *
+    * @param x
+    *            Will contain <code>n</code> elements of the finite field
+    *            specified by <code>gf</code>.
+    *
+    * @param n
+    *            The size of the randomly selected set.
+    *
+    * @param gf
+    *            The finite field from where elements are selected.
+    *
+    * @param tryRandom
+    *            If <code>true</code> the method is advised to use a
+    *            random generator with more entropy; otherwise, it wraps
+    *            around the standard <code>rand()</code> function.
+    *
+    * @warning
+    *            If <code>x</code> can not store at least <code>n</code>
+    *            elements from the finite field <code>gf</code> the method
+    *            may run into unexpected, undocumented behavior.
+    *
+    * @warning
+    *            If not sufficient memory could be provided, the method
+    *            prints an error message to <code>stderr</code> and exits
+    *            with status 'EXIT_FAILURE'.
+    */
+    static void chooseFiniteFieldSetAtRandom
+      ( uint32_t *x , int n , const SmallBinaryField & gf , bool tryRandom );
+
+
 		/**
 		 * @brief
 		 *            Creates a random instance of a fuzzy vault with
