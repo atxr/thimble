@@ -20,7 +20,7 @@ LIBDIR = /usr/local/lib/
 SRCS = $(wildcard ./src/*.cpp)
 
 # binary source files
-BSRC = $(wildcard ./*.cpp)
+BSRC = $(wildcard ./app/*.cpp)
 
 # library source files
 OBJS = $(SRCS:.cpp=.o)
@@ -31,8 +31,8 @@ BINS = $(BSRC:.cpp=)
 all:	$(OBJS) $(BOBJS)
 	ar rcs lib$(LIBRARY).a $(OBJS)
 	make binaries
-	
-.cpp.o:	
+
+.cpp.o:
 	$(CCC) $(INCLUDEFLAGS) $(CCFLAGS) -c $< -o $@
 
 binaries: $(BINS)
@@ -79,11 +79,9 @@ clean:
 
 deldoxy:
 	rm -f -r ./doc/html
-	rm -f -r ./doc/latex	
+	rm -f -r ./doc/latex
 
 clobber:
 	make clean
 	make deldoxy
-
-	
 
