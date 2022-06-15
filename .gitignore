@@ -42,6 +42,7 @@ doc/latex
 !app
 app/*
 !app/*.cpp
+!app/*.py
 
 # clangd compile commands
 compile_commands.json
