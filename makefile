@@ -5,7 +5,7 @@ LIBRARY = thimble
 CCC = g++
 
 # C++ compiler flags
-CCFLAGS = -Wall -Wwrite-strings -ansi -pedantic -O2
+CCFLAGS = -Wall -Wwrite-strings -ansi -pedantic -O2 -std=c++11
 
 # Local stuff for compilation
 INCLUDEFLAGS = -I./include/
