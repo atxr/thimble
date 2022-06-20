@@ -1,3 +1,4 @@
+#include "thimble/finger/FingerTools.h"
 #include "thimble/finger/MinutiaeFuzzyVault.h"
 #include <cstdlib>
 #include <fjfx/fjfx.h>
@@ -27,9 +28,11 @@ int main(int argc, char **argv) {
     cerr << "Could not read " << image << endl;
     exit(EXIT_FAILURE);
   }
+  DirectedPoint refPoint = fingerprint.getDirectedReferencePoint();
 
   // Access the non-empty minutiae template
   MinutiaeView minutiaeView = fingerprint.getMinutiaeView();
+  minutiaeView = FingerTools::prealign(minutiaeView, refPoint);
 
   // Create the vault from this minutiae view
   MinutiaeFuzzyVault vault(size_x, size_y);
@@ -47,10 +50,11 @@ int main(int argc, char **argv) {
     exit(EXIT_FAILURE);
   }
   MinutiaeView minutiaeViewQuery = fingerprintQuery.getMinutiaeView();
+  MinutiaeView alignedQuery = FingerTools::prealign(minutiaeViewQuery, fingerprintQuery.getDirectedReferencePoint());
 
   // Try to open the vault
   // NOTE: the query is supposed aligned
-  if (!vault.open(f, minutiaeViewQuery)) {
+  if (!vault.open(f, alignedQuery)) {
     cerr << "Could not open the vault with " << query << endl;
     exit(EXIT_FAILURE);
   }
