@@ -42,7 +42,7 @@ doc/latex
 !app
 app/*
 !app/*.cpp
-!app/*.py
+!app/plotters
 
 # clangd compile commands
 compile_commands.json
