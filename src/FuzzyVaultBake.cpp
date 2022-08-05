@@ -1,4 +1,6 @@
 #include <iostream>
+#include <algorithm>
+#include <utility>
 #include <fstream>
 #include <cstring>
 #include <unordered_map>
@@ -146,13 +148,21 @@ bool FuzzyVaultBake::decode(SmallBinaryFieldPolynomial &f, const uint32_t *x, co
     free(b);
     free(indices);
 
-    cout << "Writting to /tmp/log.bake" << endl;
-    ofstream log("/tmp/log.bake");
-    for (const auto &value : result)
-        log << "result[" << value.first << "] = " << value.second << endl;
+    vector<pair<uint32_t, int>> top3(3);
+    partial_sort_copy(
+        begin(result), end(result),
+        top3.begin(), top3.end(),
+        [](auto &p1, auto &p2)
+        {
+            return p1.second > p2.second;
+        });
 
-    log << "Succeded with " << f.eval(0) << endl;
-    log.close();
+    cout << "Succeded with: " << endl
+         << "   1. " << top3[0].first << " with " << top3[0].second << " occurences" << endl
+         << "   2. " << top3[1].first << " with " << top3[1].second << " occurences" << endl
+         << "   3. " << top3[2].first << " with " << top3[2].second << " occurences" << endl
+         << "   with a total of " << maxIts << " tests." << endl;
+
     return state;
 }
 
