@@ -76,10 +76,13 @@ public:
      * @param k
      * @param hash: useless parameter, will be null
      * @param D
-     * @return false if some errors occured 
+     * @return false if some errors occured
      */
     bool decode(SmallBinaryFieldPolynomial &f, const uint32_t *x, const uint32_t *y,
                 int t, int k, const uint8_t hash[20], int D) const;
+
+    bool open(SmallBinaryFieldPolynomial &f, const uint32_t *B, int t) const;
+    bool open(SmallBinaryFieldPolynomial &f, const MinutiaeView &view) const;
 };
 
 #endif
