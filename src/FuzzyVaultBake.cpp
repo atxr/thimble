@@ -1,5 +1,5 @@
 #include <iostream>
-#include <fstream> 
+#include <fstream>
 #include <cstring>
 #include <unordered_map>
 #include <thimble/security/SHA.h>
@@ -36,7 +36,6 @@ BytesVault FuzzyVaultBake::toBytesVault()
 
 uint32_t FuzzyVaultBake::getf0(MinutiaeView view)
 {
-    cout << "TESTETESTESTESTES" << endl;
     SmallBinaryFieldPolynomial f(getField());
     if (!open(f, view))
     {
@@ -147,6 +146,7 @@ bool FuzzyVaultBake::decode(SmallBinaryFieldPolynomial &f, const uint32_t *x, co
     free(b);
     free(indices);
 
+    cout << "Writting to /tmp/log.bake" << endl;
     ofstream log("/tmp/log.bake");
     for (const auto &value : result)
         log << "result[" << value.first << "] = " << value.second << endl;
@@ -156,64 +156,23 @@ bool FuzzyVaultBake::decode(SmallBinaryFieldPolynomial &f, const uint32_t *x, co
     return state;
 }
 
-/**
- * @brief
- *             Use a quantized minutiae template as a query to open the
- *             vault.
- *
- * @details
- *             This is a variant of the \link open()\endlink
- *             function in which a set of quantized minutiae is
- *             used to open the vault. Therein, a quantized minutia is
- *             encoded as an element of the finite field that can be
- *             accessed via \link getField()\endlink.
- *
- *             To obtain the feature set of an absolutely pre-aligned
- *             minutiae template, the \link quantize()\endlink method
- *             can be used.
- *
- * @param f
- *             Will be set to the secret polynomial on successful
- *             verification; otherwise the content will be left
- *             unchanged
- *
- * @param B
- *             The feature set.
- *
- * @param t
- *             Number of elements in the feature set.
- *
- * @return
- *             <code>true</code> if the verification procedure was
- *             successful; otherwise, if the verification was not
- *             successful, the function returns <code>false</code>.
- *
- * @warning
- *             If this \link ProtectedMinutiaeTemplate\endlink
- *             does not represent a successfully enrolled and
- *             decrypted protected minutiae template, i.e.,
- *             if \link isDecrypted()\endlink
- *             returns <code>false</code>, the function
- *             prints an error message to <code>stderr</code> and
- *             exits with status 'EXIT_FAILURE'.
- *
- * @warning
- *             If <code>B</code> does not contain at least
- *             <code>t</code> well-defined distinct feature elements,
- *             the function runs into undocumented behavior.
- *
- * @warning
- *             If not enough memory could be provided, an error
- *             message is printed to <code>stderr</code> and the
- *             program exits with status 'EXIT_FAILURE'.
- */
-bool FuzzyVaultBake::open(SmallBinaryFieldPolynomial &f, const uint32_t *B, int t) const
+bool FuzzyVaultBake::open(SmallBinaryFieldPolynomial &f, const MinutiaeView &view) const
 {
+    // Allocate memory to temporarily hold the feature set.
+    uint32_t *B = (uint32_t *)malloc(this->tmax * sizeof(uint32_t));
+    if (B == NULL)
+    {
+        cerr << "ProtectedMinutiaeTemplate::open: out of memory." << endl;
+        exit(EXIT_FAILURE);
+    }
+
+    // Extract the feature set and ...
+    int t = quantize(B, view);
 
     // Ensure that this instance does protect a feature set and ...
     if (!isEnrolled())
     {
-        cerr << "FuzzyVaultBake::open: "
+        cerr << "ProtectedMinutiaeTemplate::open: "
              << "no minutiae template protected by this view." << endl;
         exit(EXIT_FAILURE);
     }
@@ -221,7 +180,7 @@ bool FuzzyVaultBake::open(SmallBinaryFieldPolynomial &f, const uint32_t *B, int 
     // ... contains a decrypted polynomial.
     if (isEncrypted())
     {
-        cerr << "FuzzyVaultBake::open: "
+        cerr << "ProtectedMinutiaeTemplate::open: "
              << "vault is encrypted; decrypt first." << endl;
         exit(EXIT_FAILURE);
     }
@@ -232,67 +191,38 @@ bool FuzzyVaultBake::open(SmallBinaryFieldPolynomial &f, const uint32_t *B, int 
     y = (uint32_t *)malloc(t * sizeof(uint32_t));
     if (x == NULL || y == NULL)
     {
-        cerr << "FuzzyVaultBake::open: "
+        cerr << "ProtectedMinutiaeTemplate::open: "
              << "Out of memory." << endl;
         exit(EXIT_FAILURE);
     }
 
     bool success = false;
 
-    // Iterate of candidates of slow-down values until
-    // decoding is successful or the whole slow-down range
-    // has been tested
-    for (BigInteger slowDownVal = 0;
-         BigInteger::compare(slowDownVal, this->slowDownFactor) < 0;
-         add(slowDownVal, slowDownVal, 1))
+    // TODO talk about slowDown
+    // The slowDown utility is not used with the FuzzyVaultBake
+    // If the slowDownFactor is higher than 1, the program decoding shouldn't work
+    if (BigInteger::compare(slowDownFactor, BigInteger(1)) != 0)
     {
-
-        SmallBinaryFieldPolynomial V = unpackVaultPolynomial(slowDownVal);
-
-        // Build unlocking set and ...
-        for (int j = 0; j < t; j++)
-        {
-
-            // ... don't forget to apply the permutation process
-            x[j] = _reorder(B[j]);
-
-            y[j] = V.eval(x[j]);
-        }
-
-        // Attempt to decode the unlocking set
-        success = decode(f, x, y, t, this->k, this->hash, this->D);
-
-        if (success)
-        {
-            break;
-        }
+        cerr << "Error: You cannot use the slowDown utility with FuzzyVaultBake"
+             << "You must set slowDownFactor to 1" << endl;
+        exit(EXIT_FAILURE);
     }
+    SmallBinaryFieldPolynomial V = unpackVaultPolynomial();
+
+    // Build unlocking set and ...
+    for (int j = 0; j < t; j++)
+    {
+        // ... don't forget to apply the permutation process
+        x[j] = _reorder(B[j]);
+        y[j] = V.eval(x[j]);
+    }
+
+    // Attempt to decode the unlocking set
+    success = decode(f, x, y, t, this->k, this->hash, this->D);
 
     free(x);
     free(y);
-
-    return success;
-}
-
-bool FuzzyVaultBake::open(SmallBinaryFieldPolynomial &f, const MinutiaeView &view) const
-{
-
-    // Allocate memory to temporarily hold the feature set.
-    uint32_t *x = (uint32_t *)malloc(this->tmax * sizeof(uint32_t));
-    if (x == NULL)
-    {
-        cerr << "FuzzyVaultBake::open: out of memory." << endl;
-        exit(EXIT_FAILURE);
-    }
-
-    // Extract the feature set and ...
-    int t = quantize(x, view);
-
-    // ... attempt to open with the feature set.
-    bool success = open(f, x, t);
-
-    // Free temporarily allocated memory.
-    free(x);
+    free(B);
 
     return success;
 }

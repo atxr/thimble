@@ -81,7 +81,6 @@ public:
     bool decode(SmallBinaryFieldPolynomial &f, const uint32_t *x, const uint32_t *y,
                 int t, int k, const uint8_t hash[20], int D) const;
 
-    bool open(SmallBinaryFieldPolynomial &f, const uint32_t *B, int t) const;
     bool open(SmallBinaryFieldPolynomial &f, const MinutiaeView &view) const;
 };
 
