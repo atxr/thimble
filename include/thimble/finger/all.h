@@ -34,7 +34,8 @@
 #include <thimble/finger/FingerTools.h>
 #include <thimble/finger/MinutiaeFuzzyVault.h>
 #include <thimble/finger/MinutiaeRecord.h>
-#include <thimble/finger/ProtectedMinutiaeTemplate.h>
+#include <thimble/finger/FuzzyVaultBake.h>
+// #include <thimble/finger/ProtectedMinutiaeTemplate.h>
 #include <thimble/finger/ProtectedMinutiaeRecord.h>
 #include <thimble/finger/Segmentation.h>
 #include <thimble/finger/TentedArchModel.h>
