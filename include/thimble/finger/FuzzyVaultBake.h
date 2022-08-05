@@ -27,7 +27,7 @@ struct BytesVault
  *
  * @author Alexandre TULLOT
  */
-class FuzzyVaultBake : ProtectedMinutiaeTemplate
+class FuzzyVaultBake : public ProtectedMinutiaeTemplate
 {
     /**
      * @brief Construct a new Fuzzy Vault Bake object with a byte representation
