@@ -54,8 +54,8 @@ using namespace std;
 /**
  * @brief The library's namespace.
  */
-namespace thimble {
-
+namespace thimble
+{
 
 	/**
 	 * @brief
@@ -73,7 +73,8 @@ namespace thimble {
 	 *            in which the width and the height of the fingerprint
 	 *            image is specified.
 	 */
-	ProtectedMinutiaeTemplate::ProtectedMinutiaeTemplate() {
+	ProtectedMinutiaeTemplate::ProtectedMinutiaeTemplate()
+	{
 		this->width = -1;
 		this->height = -1;
 		this->fingerPosition = UNKNOWN_FINGER;
@@ -87,7 +88,7 @@ namespace thimble {
 		this->t = -1;
 		this->vaultPolynomialData = NULL;
 		this->encryptedVaultPolynomialData = NULL;
-		memset(this->hash,0,20);
+		memset(this->hash, 0, 20);
 		this->is_initialized = false;
 	}
 
@@ -121,17 +122,17 @@ namespace thimble {
 	 *             not greater than 0 or if <code>dpi</code> does
 	 *             not range between 300 and 1000, an error message
 	 *             is printed to <code>stderr</code> and the program
-     *             exits with status 'EXIT_FAILURE'.
+	 *             exits with status 'EXIT_FAILURE'.
 	 *
 	 * @warning
 	 *             If not enough memory could be provided, an error
 	 *             message is printed to <code>stderr</code> and the
-     *             program exits with status 'EXIT_FAILURE'.
+	 *             program exits with status 'EXIT_FAILURE'.
 	 */
-	ProtectedMinutiaeTemplate::ProtectedMinutiaeTemplate
-	( int width , int height , int dpi , FINGER_POSITION_T fingerPosition ) {
+	ProtectedMinutiaeTemplate::ProtectedMinutiaeTemplate(int width, int height, int dpi, FINGER_POSITION_T fingerPosition)
+	{
 
-		first_init(width,height,dpi,fingerPosition);
+		first_init(width, height, dpi, fingerPosition);
 	}
 
 	/**
@@ -147,8 +148,8 @@ namespace thimble {
 	 *             message is printed to <code>stderr</code> and the
 	 *             program exits with status 'EXIT_FAILURE'.
 	 */
-	ProtectedMinutiaeTemplate::ProtectedMinutiaeTemplate
-	( const ProtectedMinutiaeTemplate & vault ) {
+	ProtectedMinutiaeTemplate::ProtectedMinutiaeTemplate(const ProtectedMinutiaeTemplate &vault)
+	{
 
 		this->width = -1;
 		this->height = -1;
@@ -163,7 +164,7 @@ namespace thimble {
 		this->t = -1;
 		this->vaultPolynomialData = NULL;
 		this->encryptedVaultPolynomialData = NULL;
-		memset(this->hash,0,20);
+		memset(this->hash, 0, 20);
 		this->is_initialized = false;
 
 		*this = vault;
@@ -177,7 +178,8 @@ namespace thimble {
 	 *             Frees all the memory helt by the protected minutiae
 	 *             template.
 	 */
-	ProtectedMinutiaeTemplate::~ProtectedMinutiaeTemplate() {
+	ProtectedMinutiaeTemplate::~ProtectedMinutiaeTemplate()
+	{
 
 		clear();
 		delete this->gfPtr;
@@ -224,14 +226,14 @@ namespace thimble {
 	 *             message is printed to <code>stderr</code> and the
 	 *             program exits with status 'EXIT_FAILURE'.
 	 */
-	void ProtectedMinutiaeTemplate::initialize
-	( int width , int height ,
-	  int dpi , FINGER_POSITION_T fingerPosition ) {
+	void ProtectedMinutiaeTemplate::initialize(int width, int height,
+											   int dpi, FINGER_POSITION_T fingerPosition)
+	{
 
 		clear();
 		delete this->gfPtr;
 
-		first_init(width,height,dpi,fingerPosition);
+		first_init(width, height, dpi, fingerPosition);
 	}
 
 	/**
@@ -256,10 +258,11 @@ namespace thimble {
 	 *             message is printed to <code>stderr</code> and the
 	 *             program exits with status 'EXIT_FAILURE'.
 	 */
-	ProtectedMinutiaeTemplate & ProtectedMinutiaeTemplate::operator=
-			( const ProtectedMinutiaeTemplate & vault ) {
+	ProtectedMinutiaeTemplate &ProtectedMinutiaeTemplate::operator=(const ProtectedMinutiaeTemplate &vault)
+	{
 
-		if ( this != &vault ) { // Do only execute if not a self assignment.
+		if (this != &vault)
+		{ // Do only execute if not a self assignment.
 
 			// Copy primitive member variables
 			this->width = vault.width;
@@ -277,87 +280,100 @@ namespace thimble {
 			// Adopt assignment operator of the 'std::vector' class
 			this->grid = vault.grid;
 
-
 			// Copy underlying finite field
-			if ( this->gfPtr == NULL && vault.gfPtr != NULL ) {
+			if (this->gfPtr == NULL && vault.gfPtr != NULL)
+			{
 				this->gfPtr = new (nothrow) SmallBinaryField(vault.gfPtr[0]);
-				if ( this->gfPtr == NULL ) {
+				if (this->gfPtr == NULL)
+				{
 					cerr << "ProtectedMinutiaeTemplate: out of memory." << endl;
-                    exit(EXIT_FAILURE);
+					exit(EXIT_FAILURE);
 				}
-			} else if ( this->gfPtr != NULL && vault.gfPtr != NULL ){
+			}
+			else if (this->gfPtr != NULL && vault.gfPtr != NULL)
+			{
 				this->gfPtr[0] = vault.gfPtr[0];
-			} else if ( this->gfPtr != NULL && vault.gfPtr == NULL ) {
+			}
+			else if (this->gfPtr != NULL && vault.gfPtr == NULL)
+			{
 				delete this->gfPtr;
 				this->gfPtr = NULL;
 			}
 
 			// Copy vault down data
-			if ( this->vaultPolynomialData == NULL &&
-				 vault.vaultPolynomialData != NULL ) {
+			if (this->vaultPolynomialData == NULL &&
+				vault.vaultPolynomialData != NULL)
+			{
 				int n = vaultDataSize();
 				this->vaultPolynomialData =
-						(uint8_t*)malloc( n * sizeof(uint8_t) );
-				if ( this->vaultPolynomialData == NULL ) {
+					(uint8_t *)malloc(n * sizeof(uint8_t));
+				if (this->vaultPolynomialData == NULL)
+				{
 					cerr << "ProtectedMinutiaeTemplate: out of memory." << endl;
-                    exit(EXIT_FAILURE);
+					exit(EXIT_FAILURE);
 				}
-				memcpy
-				(this->vaultPolynomialData,
-				 vault.vaultPolynomialData,n);
-			} else if (this->vaultPolynomialData != NULL &&
-					    vault.vaultPolynomialData ) {
+				memcpy(this->vaultPolynomialData,
+					   vault.vaultPolynomialData, n);
+			}
+			else if (this->vaultPolynomialData != NULL &&
+					 vault.vaultPolynomialData)
+			{
 				int n = vaultDataSize();
 				this->vaultPolynomialData =
-					(uint8_t*)realloc
-					(this->vaultPolynomialData,n*sizeof(uint8_t));
-				if ( this->vaultPolynomialData == NULL ) {
+					(uint8_t *)realloc(this->vaultPolynomialData, n * sizeof(uint8_t));
+				if (this->vaultPolynomialData == NULL)
+				{
 					cerr << "ProtectedMinutiaeTemplate: out of memory." << endl;
-                    exit(EXIT_FAILURE);
+					exit(EXIT_FAILURE);
 				}
-				memcpy
-				(this->vaultPolynomialData,
-				 vault.vaultPolynomialData,n);
-			} else if ( this->vaultPolynomialData != NULL &&
-						 vault.vaultPolynomialData == NULL ) {
+				memcpy(this->vaultPolynomialData,
+					   vault.vaultPolynomialData, n);
+			}
+			else if (this->vaultPolynomialData != NULL &&
+					 vault.vaultPolynomialData == NULL)
+			{
 				free(this->vaultPolynomialData);
 				this->vaultPolynomialData = NULL;
 			}
 
 			// Copy encrypted data
-			if ( this->encryptedVaultPolynomialData == NULL &&
-				 vault.encryptedVaultPolynomialData != NULL ) {
+			if (this->encryptedVaultPolynomialData == NULL &&
+				vault.encryptedVaultPolynomialData != NULL)
+			{
 				int n = vaultDataSize();
 				this->encryptedVaultPolynomialData =
-						(uint8_t*)malloc( n * sizeof(uint8_t) );
-				if ( this->encryptedVaultPolynomialData == NULL ) {
+					(uint8_t *)malloc(n * sizeof(uint8_t));
+				if (this->encryptedVaultPolynomialData == NULL)
+				{
 					cerr << "ProtectedMinutiaeTemplate: out of memory." << endl;
-                    exit(EXIT_FAILURE);
+					exit(EXIT_FAILURE);
 				}
-				memcpy
-				(this->encryptedVaultPolynomialData,
-				 vault.encryptedVaultPolynomialData,n);
-			} else if (this->encryptedVaultPolynomialData != NULL &&
-					    vault.encryptedVaultPolynomialData ) {
+				memcpy(this->encryptedVaultPolynomialData,
+					   vault.encryptedVaultPolynomialData, n);
+			}
+			else if (this->encryptedVaultPolynomialData != NULL &&
+					 vault.encryptedVaultPolynomialData)
+			{
 				int n = vaultDataSize();
 				this->encryptedVaultPolynomialData =
-					(uint8_t*)realloc
-					(this->encryptedVaultPolynomialData,n*sizeof(uint8_t));
-				if ( this->encryptedVaultPolynomialData == NULL ) {
+					(uint8_t *)realloc(this->encryptedVaultPolynomialData, n * sizeof(uint8_t));
+				if (this->encryptedVaultPolynomialData == NULL)
+				{
 					cerr << "ProtectedMinutiaeTemplate: out of memory." << endl;
-                    exit(EXIT_FAILURE);
+					exit(EXIT_FAILURE);
 				}
-				memcpy
-				(this->encryptedVaultPolynomialData,
-				 vault.encryptedVaultPolynomialData,n);
-			} else if ( this->encryptedVaultPolynomialData != NULL &&
-						 vault.encryptedVaultPolynomialData == NULL ) {
+				memcpy(this->encryptedVaultPolynomialData,
+					   vault.encryptedVaultPolynomialData, n);
+			}
+			else if (this->encryptedVaultPolynomialData != NULL &&
+					 vault.encryptedVaultPolynomialData == NULL)
+			{
 				free(this->encryptedVaultPolynomialData);
 				this->encryptedVaultPolynomialData = NULL;
 			}
 
 			// Copy hash value of secret polynomial
-			memcpy(this->hash,vault.hash,20);
+			memcpy(this->hash, vault.hash, 20);
 
 			// Copy permutation by using its assignment operator
 			this->permutation = vault.permutation;
@@ -385,8 +401,8 @@ namespace thimble {
 	 *             A reference to a valid
 	 *             \link ProtectedMinutiaeTemplate\endlink
 	 */
-	void ProtectedMinutiaeTemplate::swap
-	( ProtectedMinutiaeTemplate & vault1 , ProtectedMinutiaeTemplate & vault2 ) {
+	void ProtectedMinutiaeTemplate::swap(ProtectedMinutiaeTemplate &vault1, ProtectedMinutiaeTemplate &vault2)
+	{
 
 		// Copies of the member variables of 'vault1' into temporary
 		// member variables
@@ -399,12 +415,12 @@ namespace thimble {
 		int k = vault1.k;
 		int tmax = vault1.tmax;
 		int D = vault1.D;
-		std::vector< std::pair<double,double> > grid = vault1.grid;
+		std::vector<std::pair<double, double>> grid = vault1.grid;
 		SmallBinaryField *gfPtr = vault1.gfPtr;
 		int t = vault1.t;
 		uint8_t *vaultPolynomialData = vault1.vaultPolynomialData;
 		uint8_t *encryptedVaultPolynomialData =
-				vault1.encryptedVaultPolynomialData;
+			vault1.encryptedVaultPolynomialData;
 		bool is_initialized = vault1.is_initialized;
 
 		// Copy the members of 'vault2' into 'vault1'
@@ -422,9 +438,8 @@ namespace thimble {
 		vault1.t = vault2.t;
 		vault1.vaultPolynomialData = vault2.vaultPolynomialData;
 		vault1.encryptedVaultPolynomialData =
-				vault2.encryptedVaultPolynomialData;
+			vault2.encryptedVaultPolynomialData;
 		vault1.is_initialized = vault2.is_initialized;
-
 
 		// Copy temporary member variables to 'vault2'
 		vault2.width = width;
@@ -441,21 +456,21 @@ namespace thimble {
 		vault2.t = t;
 		vault2.vaultPolynomialData = vaultPolynomialData;
 		vault2.encryptedVaultPolynomialData =
-				encryptedVaultPolynomialData;
+			encryptedVaultPolynomialData;
 		vault2.is_initialized = is_initialized;
 
 		// SPECIAL CASE: swap the secret polynomials' hash values
 		// via 'memcpy'
 		uint8_t hash[20];
-		memcpy(hash,vault1.hash,20);
-		memcpy(vault1.hash,vault2.hash,20);
-		memcpy(vault2.hash,hash,20);
+		memcpy(hash, vault1.hash, 20);
+		memcpy(vault1.hash, vault2.hash, 20);
+		memcpy(vault2.hash, hash, 20);
 		// SPECIAL CASE: Swap the 'permutation' fields using
 		// the 'Permutation::swap' method.
-        Permutation::swap(vault1.permutation,vault2.permutation);
+		Permutation::swap(vault1.permutation, vault2.permutation);
 		// SPECIAL CASE: Swap the 'slowDownFactor' fields using
 		// the 'BigInteger::swap' method.
-        vault1.slowDownFactor.swap(vault2.slowDownFactor);
+		vault1.slowDownFactor.swap(vault2.slowDownFactor);
 	}
 
 	/**
@@ -481,7 +496,8 @@ namespace thimble {
 	 *            templates have been extracted and, otherwise,
 	 *            <code>false</code>.
 	 */
-	bool ProtectedMinutiaeTemplate::isInitialized() const {
+	bool ProtectedMinutiaeTemplate::isInitialized() const
+	{
 
 		return this->is_initialized;
 	}
@@ -498,7 +514,8 @@ namespace thimble {
 	 *
 	 * @see ProtectedMinutiaeTemplate::enroll()
 	 */
-	bool ProtectedMinutiaeTemplate::isEnrolled() const {
+	bool ProtectedMinutiaeTemplate::isEnrolled() const
+	{
 		return this->t >= 0;
 	}
 
@@ -532,9 +549,10 @@ namespace thimble {
 	 *
 	 * @see ProtectedMinutiaeTemplate::encrypt(const AES128&)
 	 */
-	bool ProtectedMinutiaeTemplate::isEncrypted() const {
+	bool ProtectedMinutiaeTemplate::isEncrypted() const
+	{
 		return this->encryptedVaultPolynomialData != NULL &&
-				this->vaultPolynomialData == NULL;
+			   this->vaultPolynomialData == NULL;
 	}
 
 	/**
@@ -564,7 +582,8 @@ namespace thimble {
 	 *
 	 * @see ProtectedMinutiaeTemplate::decrypt(const AES128&)
 	 */
-	bool ProtectedMinutiaeTemplate::isDecrypted() const {
+	bool ProtectedMinutiaeTemplate::isDecrypted() const
+	{
 		return this->vaultPolynomialData != NULL;
 	}
 
@@ -586,7 +605,8 @@ namespace thimble {
 	 *
 	 * @see ProtectedMinutiaeTemplate::encrypt(const AES128&)
 	 */
-	bool ProtectedMinutiaeTemplate::containsEncryptedData() const {
+	bool ProtectedMinutiaeTemplate::containsEncryptedData() const
+	{
 		return this->encryptedVaultPolynomialData != NULL;
 	}
 
@@ -620,71 +640,78 @@ namespace thimble {
 	 *            If \link isEnrolled()\endlink returns
 	 *            <code>true</code>, an error message is printed to
 	 *            <code>stderr</code> and the program exits with
-     *            status 'EXIT_FAILURE'.
+	 *            status 'EXIT_FAILURE'.
 	 *
 	 * @warning
 	 *            If not enough memory could be provided, an error
 	 *            message is printed to <code>stderr</code> and the
-     *            program exits with status 'EXIT_FAILURE'.
+	 *            program exits with status 'EXIT_FAILURE'.
 	 */
-	bool ProtectedMinutiaeTemplate::enroll( const MinutiaeView & view ) {
+	bool ProtectedMinutiaeTemplate::enroll(const MinutiaeView &view)
+	{
 
 		// Check if essential information about the original minutiae
 		// template, such as width and height, are known.
-		if ( !this->is_initialized ) {
+		if (!this->is_initialized)
+		{
 			cerr << "ProtectedMinutiaeTemplate::enroll: "
 				 << "object not initialized." << endl;
 			exit(EXIT_FAILURE);
 		}
 
 		// If already enrolled, ...
-		if ( isEnrolled() ) {
+		if (isEnrolled())
+		{
 			// ... print an error message and ...
 			cerr << "ProtectedMinutiaeTemplate::enroll: "
 				 << "already enrolled, clear first." << endl;
-            // .. exit with status 'EXIT_FAILURE'.
-            exit(EXIT_FAILURE);
+			// .. exit with status 'EXIT_FAILURE'.
+			exit(EXIT_FAILURE);
 		}
 
 		int n = getVaultSize();
 
 		// Temporarily generate secret polynomial and
 		SmallBinaryFieldPolynomial f(getField());
-		f.random(this->k,true);
+		f.random(this->k, true);
 
 		// save its SHA-1 hash value
-        SHA().hash(this->hash,f.getData(),f.deg()+1);
+		SHA().hash(this->hash, f.getData(), f.deg() + 1);
 
 		// Generate user-specific public permutation process
 		updatePermutation();
 
 		// Allocate memory that can hold the minutiae template's quantization
-		uint32_t *x = (uint32_t*)malloc( this->tmax * sizeof(uint32_t) );
-		if ( x == NULL ) {
+		uint32_t *x = (uint32_t *)malloc(this->tmax * sizeof(uint32_t));
+		if (x == NULL)
+		{
 			cerr << "ProtectedMinutiaeTemplate::enroll: out of memory."
 				 << endl;
-            exit(EXIT_FAILURE);
+			exit(EXIT_FAILURE);
 		}
 
 		// Extract feature set from input minutiae template
-		int t = quantize(x,view);
+		int t = quantize(x, view);
 
 		// Check whether feature set is large enough to
 		// allow successful genuine verification.
-		if ( t < this->k ) {
+		if (t < this->k)
+		{
 			return false;
 		}
 
 		// Apply the random public user-specific permutation process
 		// to the feature set.
-		for ( int j = 0 ; j < t ; j++ ) {
+		for (int j = 0; j < t; j++)
+		{
 			x[j] = _reorder(x[j]);
 		}
 
 		// Supplement the feature set with blending features.
-		for ( int j = t ; j < this->tmax ; j++ ) {
+		for (int j = t; j < this->tmax; j++)
+		{
 			x[j] = n + MathTools::rand32(true) %
-					(getField().getCardinality() - n );
+						   (getField().getCardinality() - n);
 		}
 
 		// The number of feature elements (including blending features)
@@ -693,11 +720,11 @@ namespace thimble {
 		// Build characteristic polynomial of feature set which is the
 		// unique monic polynomial having the feature elements as roots.
 		SmallBinaryFieldPolynomial V(getField());
-		V.buildFromRoots(x,t);
+		V.buildFromRoots(x, t);
 
 		// Obfuscate the characteristic polynomial by the secret polynomial
 		// and vice versa by building the 'vault polynomial'
-		add(V,V,f);
+		add(V, V, f);
 
 		// Save degree of vault polynomial in the corresponding
 		// member variable.
@@ -740,21 +767,22 @@ namespace thimble {
 	 *
 	 * @warning
 	 *             If this \link ProtectedMinutiaeTemplate\endlink
-     *             does not represent a successfully enrolled
-     *             decrypted protected minutiae template, i.e., if
-     *      \link ProtectedMinutiaeTemplate::isDecrypted()\endlink
-     *             returns <code>false</code>, the function
-     *             prints an error message to <code>stderr</code> and
-     *             exits with status 'EXIT_FAILURE'.
+	 *             does not represent a successfully enrolled
+	 *             decrypted protected minutiae template, i.e., if
+	 *      \link ProtectedMinutiaeTemplate::isDecrypted()\endlink
+	 *             returns <code>false</code>, the function
+	 *             prints an error message to <code>stderr</code> and
+	 *             exits with status 'EXIT_FAILURE'.
 	 *
 	 * @warning
 	 *             If not enough memory could be provided, an error
 	 *             message is printed to <code>stderr</code> and the
 	 *             program exits with status 'EXIT_FAILURE'.
 	 */
-	bool ProtectedMinutiaeTemplate::verify( const MinutiaeView & view ) const {
+	bool ProtectedMinutiaeTemplate::verify(const MinutiaeView &view) const
+	{
 		SmallBinaryFieldPolynomial f(getField());
-		return open(f,view);
+		return open(f, view);
 	}
 
 	/**
@@ -789,28 +817,31 @@ namespace thimble {
 	 * \link ProtectedMinutiaeTemplate::containsEncryptedData()\endlink
 	 *             returns <code>true</code>)
 	 *             an error message is printed to <code>stderr</code>
-     *             and the program exits with status 'EXIT_FAILURE'.
+	 *             and the program exits with status 'EXIT_FAILURE'.
 	 *
 	 * @see decrypt()
 	 *
 	 * @warning
 	 *             If not enough memory could be provided, an error
 	 *             message is printed to <code>stderr</code> and the
-     *             program exits with status 'EXIT_FAILURE'.
+	 *             program exits with status 'EXIT_FAILURE'.
 	 */
-	void ProtectedMinutiaeTemplate::encrypt( const AES128 & key ) {
+	void ProtectedMinutiaeTemplate::encrypt(const AES128 &key)
+	{
 
 		// Ensure that this instance does protect a minutiae template.
-		if ( !isEnrolled() ) {
+		if (!isEnrolled())
+		{
 			cerr << "ProtectedMinutiaeTemplate::encrypt: no vault built." << endl;
-            exit(EXIT_FAILURE);
+			exit(EXIT_FAILURE);
 		}
 
 		// Ensure that this instance does not already hold encrypted data
-		if ( isEncrypted() ) {
+		if (isEncrypted())
+		{
 			cerr << "ProtectedMinutiaeTemplate::encrypt: already encrypted."
 				 << endl;
-            exit(EXIT_FAILURE);
+			exit(EXIT_FAILURE);
 		}
 
 		AES128 aes(key);
@@ -818,8 +849,7 @@ namespace thimble {
 		int n = vaultDataSize();
 
 		// ENCRYPTION
-		aes.encrypt
-		(this->vaultPolynomialData,this->vaultPolynomialData,n);
+		aes.encrypt(this->vaultPolynomialData, this->vaultPolynomialData, n);
 
 		// Exchange references to encrypted data array
 		this->encryptedVaultPolynomialData = this->vaultPolynomialData;
@@ -870,13 +900,15 @@ namespace thimble {
 	 *             message is printed to <code>stderr</code> and the
 	 *             program exits with status 'EXIT_FAILURE'.
 	 */
-	void ProtectedMinutiaeTemplate::decrypt( const AES128 & key ) {
+	void ProtectedMinutiaeTemplate::decrypt(const AES128 &key)
+	{
 
 		// Ensure that this instance does contain encrypted data.
-		if ( !containsEncryptedData() ) {
+		if (!containsEncryptedData())
+		{
 			cerr << "ProtectedMinutiaeTemplate::decrypt: "
 				 << "contains no encrypted vault." << endl;
-            exit(EXIT_FAILURE);
+			exit(EXIT_FAILURE);
 		}
 
 		AES128 aes(key);
@@ -885,18 +917,19 @@ namespace thimble {
 
 		// Make sure that the vault polynomial data is capable of holding
 		// the encrypted data.
-		if ( this->vaultPolynomialData == NULL ) {
+		if (this->vaultPolynomialData == NULL)
+		{
 			this->vaultPolynomialData =
-					(uint8_t*)malloc( n * sizeof(uint8_t) );
-			if ( this->vaultPolynomialData == NULL ) {
+				(uint8_t *)malloc(n * sizeof(uint8_t));
+			if (this->vaultPolynomialData == NULL)
+			{
 				cerr << "ProtectedMinutiaeTemplate::decrypt: "
 					 << "out of memory." << endl;
 				exit(EXIT_FAILURE);
 			}
 		}
 
-		aes.decrypt
-		(this->vaultPolynomialData,this->encryptedVaultPolynomialData,n);
+		aes.decrypt(this->vaultPolynomialData, this->encryptedVaultPolynomialData, n);
 	}
 
 	/**
@@ -928,38 +961,41 @@ namespace thimble {
 	 *
 	 * @warning
 	 *             If this \link ProtectedMinutiaeTemplate\endlink
-     *             does not represent a successfully enrolled
-     *             decrypted protected minutiae template, i.e.,
-     *             if \link ProtectedMinutiaeTemplate::isDecrypted()\endlink
-     *             returns <code>false</code>, the function
-     *             prints an error message to <code>stderr</code> and
-     *             exits with status 'EXIT_FAILURE'.
+	 *             does not represent a successfully enrolled
+	 *             decrypted protected minutiae template, i.e.,
+	 *             if \link ProtectedMinutiaeTemplate::isDecrypted()\endlink
+	 *             returns <code>false</code>, the function
+	 *             prints an error message to <code>stderr</code> and
+	 *             exits with status 'EXIT_FAILURE'.
 	 *
 	 * @warning
 	 *             If not enough memory could be provided, an error
 	 *             message is printed to <code>stderr</code> and the
 	 *             program exits with status 'EXIT_FAILURE'.
 	 */
-	bool ProtectedMinutiaeTemplate::open
-	( SmallBinaryFieldPolynomial & f , const MinutiaeView & view ) const {
+	bool ProtectedMinutiaeTemplate::open(SmallBinaryFieldPolynomial &f, const MinutiaeView &view) const
+	{
+		{
 
-		// Allocate memory to temporarily hold the feature set.
-		uint32_t *x = (uint32_t*)malloc( this->tmax * sizeof(uint32_t) );
-		if ( x == NULL ) {
-			cerr << "ProtectedMinutiaeTemplate::open: out of memory." << endl;
-            exit(EXIT_FAILURE);
+			// Allocate memory to temporarily hold the feature set.
+			uint32_t *x = (uint32_t *)malloc(this->tmax * sizeof(uint32_t));
+			if (x == NULL)
+			{
+				cerr << "ProtectedMinutiaeTemplate::open: out of memory." << endl;
+				exit(EXIT_FAILURE);
+			}
+
+			// Extract the feature set and ...
+			int t = quantize(x, view);
+
+			// ... attempt to open with the feature set.
+			bool success = open(f, x, t);
+
+			// Free temporarily allocated memory.
+			free(x);
+
+			return success;
 		}
-
-		// Extract the feature set and ...
-		int t = quantize(x,view);
-
-		// ... attempt to open with the feature set.
-		bool success = open(f,x,t);
-
-		// Free temporarily allocated memory.
-		free(x);
-
-		return success;
 	}
 
 	/**
@@ -973,10 +1009,10 @@ namespace thimble {
 	 *             used to open the vault. Therein, a quantized minutia is
 	 *             encoded as an element of the finite field that can be
 	 *             accessed via \link getField()\endlink.
-     *
-     *             To obtain the feature set of an absolutely pre-aligned
-     *             minutiae template, the \link quantize()\endlink method
-     *             can be used.
+	 *
+	 *             To obtain the feature set of an absolutely pre-aligned
+	 *             minutiae template, the \link quantize()\endlink method
+	 *             can be used.
 	 *
 	 * @param f
 	 *             Will be set to the secret polynomial on successful
@@ -996,48 +1032,51 @@ namespace thimble {
 	 *
 	 * @warning
 	 *             If this \link ProtectedMinutiaeTemplate\endlink
-     *             does not represent a successfully enrolled and
-     *             decrypted protected minutiae template, i.e.,
-     *             if \link isDecrypted()\endlink
-     *             returns <code>false</code>, the function
-     *             prints an error message to <code>stderr</code> and
-     *             exits with status 'EXIT_FAILURE'.
-     *
-     * @warning
-     *             If <code>B</code> does not contain at least
-     *             <code>t</code> well-defined distinct feature elements,
-     *             the function runs into undocumented behavior.
+	 *             does not represent a successfully enrolled and
+	 *             decrypted protected minutiae template, i.e.,
+	 *             if \link isDecrypted()\endlink
+	 *             returns <code>false</code>, the function
+	 *             prints an error message to <code>stderr</code> and
+	 *             exits with status 'EXIT_FAILURE'.
+	 *
+	 * @warning
+	 *             If <code>B</code> does not contain at least
+	 *             <code>t</code> well-defined distinct feature elements,
+	 *             the function runs into undocumented behavior.
 	 *
 	 * @warning
 	 *             If not enough memory could be provided, an error
 	 *             message is printed to <code>stderr</code> and the
 	 *             program exits with status 'EXIT_FAILURE'.
 	 */
-	bool ProtectedMinutiaeTemplate::open
-	( SmallBinaryFieldPolynomial & f , const uint32_t *B , int t ) const {
+	bool ProtectedMinutiaeTemplate::open(SmallBinaryFieldPolynomial &f, const uint32_t *B, int t) const
+	{
 
 		// Ensure that this instance does protect a feature set and ...
-		if ( !isEnrolled() ) {
+		if (!isEnrolled())
+		{
 			cerr << "ProtectedMinutiaeTemplate::open: "
 				 << "no minutiae template protected by this view." << endl;
-            exit(EXIT_FAILURE);
+			exit(EXIT_FAILURE);
 		}
 
 		// ... contains a decrypted polynomial.
-		if ( isEncrypted() ) {
+		if (isEncrypted())
+		{
 			cerr << "ProtectedMinutiaeTemplate::open: "
 				 << "vault is encrypted; decrypt first." << endl;
-            exit(EXIT_FAILURE);
+			exit(EXIT_FAILURE);
 		}
 
 		// Allocate memory to hold the set of unlocking pairs '{(x[j],y[j])}'
-		uint32_t  *x , *y;
-		x = (uint32_t*)malloc( t * sizeof(uint32_t) );
-		y = (uint32_t*)malloc( t * sizeof(uint32_t) );
-		if ( x == NULL || y == NULL ) {
+		uint32_t *x, *y;
+		x = (uint32_t *)malloc(t * sizeof(uint32_t));
+		y = (uint32_t *)malloc(t * sizeof(uint32_t));
+		if (x == NULL || y == NULL)
+		{
 			cerr << "ProtectedMinutiaeTemplate::open: "
 				 << "Out of memory." << endl;
-            exit(EXIT_FAILURE);
+			exit(EXIT_FAILURE);
 		}
 
 		bool success = false;
@@ -1045,14 +1084,16 @@ namespace thimble {
 		// Iterate of candidates of slow-down values until
 		// decoding is successful or the whole slow-down range
 		// has been tested
-		for ( BigInteger slowDownVal = 0 ;
-			  BigInteger::compare(slowDownVal,this->slowDownFactor) < 0 ;
-			  add(slowDownVal,slowDownVal,1) ) {
+		for (BigInteger slowDownVal = 0;
+			 BigInteger::compare(slowDownVal, this->slowDownFactor) < 0;
+			 add(slowDownVal, slowDownVal, 1))
+		{
 
 			SmallBinaryFieldPolynomial V = unpackVaultPolynomial(slowDownVal);
 
 			// Build unlocking set and ...
-			for ( int j = 0 ; j < t ; j++ ) {
+			for (int j = 0; j < t; j++)
+			{
 
 				// ... don't forget to apply the permutation process
 				x[j] = _reorder(B[j]);
@@ -1061,9 +1102,10 @@ namespace thimble {
 			}
 
 			// Attempt to decode the unlocking set
-			success = decode(f,x,y,t,this->k,this->hash,this->D);
+			success = decode(f, x, y, t, this->k, this->hash, this->D);
 
-			if ( success ) {
+			if (success)
+			{
 				break;
 			}
 		}
@@ -1122,20 +1164,23 @@ namespace thimble {
 	 *             <code>true</code> if the decoding attempt was successful;
 	 *             otherwise, the function returns <code>false</code>.
 	 */
-	bool ProtectedMinutiaeTemplate::decode
-	( SmallBinaryFieldPolynomial & f , const uint32_t *x , const uint32_t *y ,
-	  int t , int k , const uint8_t hash[20] , int D ) const {
+	bool ProtectedMinutiaeTemplate::decode(SmallBinaryFieldPolynomial &f, const uint32_t *x, const uint32_t *y,
+										   int t, int k, const uint8_t hash[20], int D) const
+	{
+		{
 
-		// Check whether unlocking set is of size that can possibly
-		// be decoded.
-		if ( t < k ) {
-			return false;
+			// Check whether unlocking set is of size that can possibly
+			// be decoded.
+			if (t < k)
+			{
+				return false;
+			}
+
+			// Essentially, the randomized decoder consists
+			// of the first 'D' steps of a randomized brute-force
+			// attack.
+			return FuzzyVaultTools::bfattack(f, x, y, t, k, hash, D);
 		}
-
-		// Essentially, the randomized decoder consists
-		// of the first 'D' steps of a randomized brute-force
-		// attack.
-		return FuzzyVaultTools::bfattack(f,x,y,t,k,hash,D);
 	}
 
 	/**
@@ -1150,10 +1195,11 @@ namespace thimble {
 	 *             The quantization of <code>minutia</code> encoded as a
 	 *             finite field element.
 	 */
-	uint32_t ProtectedMinutiaeTemplate::quantize( const Minutia & minutia ) const {
+	uint32_t ProtectedMinutiaeTemplate::quantize(const Minutia &minutia) const
+	{
 
 		// Access relevant data of the minutia
-		double x , y , theta;
+		double x, y, theta;
 		x = minutia.getX();
 		y = minutia.getY();
 		theta = minutia.getAngle();
@@ -1161,7 +1207,7 @@ namespace thimble {
 		// 'i' will be used to quantize the minutia's
 		// position while 'j' quantizes the minutia's
 		// angle
-		int i = -1 , j = -1;
+		int i = -1, j = -1;
 
 		// Variable helping to save the squared distance to the closest
 		// grid points yet found; its corresponding index will be
@@ -1173,20 +1219,22 @@ namespace thimble {
 		// *******************************************************************
 
 		// Iteration over the grid points
-		for ( int l = 0 ; l < (int)(this->grid.size()) ; l++ ) {
+		for (int l = 0; l < (int)(this->grid.size()); l++)
+		{
 
 			// Offset of the grid point to the position of the minutia
-			double dx , dy;
-			dx = this->grid[l].first  - x;
+			double dx, dy;
+			dx = this->grid[l].first - x;
 			dy = this->grid[l].second - y;
 
 			// The squared distance of the current grid point to the minutia.
 			// For reasons of efficiency we do not compute the square root.
-			double dist = dx*dx+dy*dy;
+			double dist = dx * dx + dy * dy;
 
 			// Check whether current grid point is closer to the minutia
 			// than the grid points before; if true, update;
-			if ( dist < minDist ) {
+			if (dist < minDist)
+			{
 				minDist = dist;
 				i = l;
 			}
@@ -1196,18 +1244,17 @@ namespace thimble {
 		// ********** END: Quantization of the minutia's positions ***********
 		// *******************************************************************
 
-
 		// *******************************************************************
 		// *********** START: Quantization of the minutia's angle ************
 		// *******************************************************************
-		j = (int)floor(theta / (M_PI+M_PI) * this->s);
+		j = (int)floor(theta / (M_PI + M_PI) * this->s);
 		// *******************************************************************
 		// *********** END: Quantization of the minutia's angle ************
 		// *******************************************************************
 
 		// Combine the position's quantization with the angle's quantization
 		// and return the result.
-		return (uint32_t)i+(uint32_t)j*(uint32_t)(this->grid.size());
+		return (uint32_t)i + (uint32_t)j * (uint32_t)(this->grid.size());
 	}
 
 	/**
@@ -1255,7 +1302,7 @@ namespace thimble {
 	 * @warning
 	 *             If <code>tmax</code> is not positive, an error message
 	 *             is printed to <code>stderr</code> and the program exits
-     *             with status 'EXIT_FAILURE'.
+	 *             with status 'EXIT_FAILURE'.
 	 *
 	 * @warning
 	 *             If <code>array</code> cannot hold <code>tmax</code>
@@ -1265,18 +1312,19 @@ namespace thimble {
 	 * @warning
 	 *             If not enough memory could be provided, an error
 	 *             message is printed to <code>stderr</code> and the
-     *             program exits with status 'EXIT_FAILURE'.
+	 *             program exits with status 'EXIT_FAILURE'.
 	 */
-	int ProtectedMinutiaeTemplate::quantize
-	( uint32_t *array , const MinutiaeView & view  , int tmax ) const {
+	int ProtectedMinutiaeTemplate::quantize(uint32_t *array, const MinutiaeView &view, int tmax) const
+	{
 
 		// Ensure that the bound on the maximal number of minutiae
 		// quantizations is positive.
-		if ( tmax < 0  ) {
+		if (tmax < 0)
+		{
 			cerr << "ProtectedMinutiaeTemplate::quantize: "
 				 << "bound on maximal number of minutiae quantizations must "
 				 << "be positive." << endl;
-            exit(EXIT_FAILURE);
+			exit(EXIT_FAILURE);
 		}
 
 		// Copy the minutiae template and ..
@@ -1288,7 +1336,8 @@ namespace thimble {
 
 		// Iterate over the minutiae in 'w' until the minutiae quantization
 		// count reaches the bound 'tmax'
-		for ( int j = 0 ; j < w.getMinutiaeCount() && t < tmax ; j++ ) {
+		for (int j = 0; j < w.getMinutiaeCount() && t < tmax; j++)
+		{
 
 			// Quantize the current minutia and ...
 			uint32_t q = quantize(w.getMinutia(j));
@@ -1297,15 +1346,18 @@ namespace thimble {
 			// in the output array; ...
 			bool alreadyContained = false;
 
-			for ( int _j = 0 ; _j < t ; _j++ ) {
-				if ( array[_j] == q ) {
+			for (int _j = 0; _j < t; _j++)
+			{
+				if (array[_j] == q)
+				{
 					alreadyContained = true;
 					break;
 				}
 			}
 
 			// ...; if not, append it in the output array.
-			if ( !alreadyContained ) {
+			if (!alreadyContained)
+			{
 				array[t++] = q;
 			}
 		}
@@ -1356,22 +1408,22 @@ namespace thimble {
 	 * @warning
 	 *             If <code>tmax</code> is not positive, an error message
 	 *             is printed to <code>stderr</code> and the program exits
-     *             with status 'EXIT_FAILURE'.
+	 *             with status 'EXIT_FAILURE'.
 	 *
 	 * @warning
 	 *             If <code>array</code> cannot hold
-     *             \link getMaxGenuineFeatures()\endlink
+	 *             \link getMaxGenuineFeatures()\endlink
 	 *             elements of type <code>uint32_t</code>, calling this
 	 *             function runs into undocumented behavior.
 	 *
 	 * @warning
 	 *             If not enough memory could be provided, an error
 	 *             message is printed to <code>stderr</code> and the
-     *             program exits with status 'EXIT_FAILURE'.
+	 *             program exits with status 'EXIT_FAILURE'.
 	 */
-	int ProtectedMinutiaeTemplate::quantize
-	( uint32_t *array , const MinutiaeView & view ) const {
-		return quantize(array,view,getMaxGenuineFeatures());
+	int ProtectedMinutiaeTemplate::quantize(uint32_t *array, const MinutiaeView &view) const
+	{
+		return quantize(array, view, getMaxGenuineFeatures());
 	}
 
 	/**
@@ -1407,15 +1459,17 @@ namespace thimble {
 	 *             finite field that can be access via
 	 *             \link getField()\endlink, an error message is printed
 	 *             to <code>stderr</code> and the program exits with
-     *             status 'EXIT_FAILURE'.
+	 *             status 'EXIT_FAILURE'.
 	 */
-	uint32_t ProtectedMinutiaeTemplate::reorder( uint32_t a ) const {
+	uint32_t ProtectedMinutiaeTemplate::reorder(uint32_t a) const
+	{
 
 		// Ensure the presence of a random permutation process
-		if ( !isEnrolled() ) {
+		if (!isEnrolled())
+		{
 			cerr << "ProtectedMinutiaeTemplate::reorder: "
 				 << "not enrolled." << endl;
-            exit(EXIT_FAILURE);
+			exit(EXIT_FAILURE);
 		}
 
 		// Call reordering without check.
@@ -1433,7 +1487,8 @@ namespace thimble {
 	 *
 	 * @see setDimension(int,int)
 	 */
-	int ProtectedMinutiaeTemplate::getWidth() const {
+	int ProtectedMinutiaeTemplate::getWidth() const
+	{
 		return this->width;
 	}
 
@@ -1448,7 +1503,8 @@ namespace thimble {
 	 *
 	 * @see setDimension(int,int)
 	 */
-	int ProtectedMinutiaeTemplate::getHeight() const {
+	int ProtectedMinutiaeTemplate::getHeight() const
+	{
 		return this->height;
 	}
 
@@ -1463,7 +1519,8 @@ namespace thimble {
 	 *
 	 * @see setFingerPosition(FINGER_POSITION_T)
 	 */
-	FINGER_POSITION_T ProtectedMinutiaeTemplate::getFingerPosition() const {
+	FINGER_POSITION_T ProtectedMinutiaeTemplate::getFingerPosition() const
+	{
 		return this->fingerPosition;
 	}
 
@@ -1478,7 +1535,8 @@ namespace thimble {
 	 *
 	 * @see setResolution(int)
 	 */
-	int ProtectedMinutiaeTemplate::getResolution() const {
+	int ProtectedMinutiaeTemplate::getResolution() const
+	{
 		return this->dpi;
 	}
 
@@ -1493,7 +1551,8 @@ namespace thimble {
 	 *
 	 * @see setGridDist(int)
 	 */
-	int ProtectedMinutiaeTemplate::getGridDist() const {
+	int ProtectedMinutiaeTemplate::getGridDist() const
+	{
 		return this->gridDist;
 	}
 
@@ -1508,7 +1567,8 @@ namespace thimble {
 	 *
 	 * @see setNumAngleQuanta(int)
 	 */
-	int ProtectedMinutiaeTemplate::getNumAngleQuanta() const {
+	int ProtectedMinutiaeTemplate::getNumAngleQuanta() const
+	{
 		return this->s;
 	}
 
@@ -1524,7 +1584,8 @@ namespace thimble {
 	 *
 	 * @see setSecretSize(int)
 	 */
-	int ProtectedMinutiaeTemplate::getSecretSize() const {
+	int ProtectedMinutiaeTemplate::getSecretSize() const
+	{
 		return this->k;
 	}
 
@@ -1541,7 +1602,8 @@ namespace thimble {
 	 *
 	 * @see setMaxGenuineFeatures(int)
 	 */
-	int ProtectedMinutiaeTemplate::getMaxGenuineFeatures() const {
+	int ProtectedMinutiaeTemplate::getMaxGenuineFeatures() const
+	{
 		return this->tmax;
 	}
 
@@ -1553,7 +1615,8 @@ namespace thimble {
 	 * @return
 	 *             The number of possible different minutiae quantizations.
 	 */
-	int ProtectedMinutiaeTemplate::getVaultSize() const {
+	int ProtectedMinutiaeTemplate::getVaultSize() const
+	{
 		return (int)(this->grid.size()) * this->s;
 	}
 
@@ -1568,7 +1631,8 @@ namespace thimble {
 	 *             region in which absolutely pre-aligned minutiae
 	 *             can occur.
 	 */
-	int ProtectedMinutiaeTemplate::getGridSize() const {
+	int ProtectedMinutiaeTemplate::getGridSize() const
+	{
 		return (int)(this->grid.size());
 	}
 
@@ -1585,7 +1649,8 @@ namespace thimble {
 	 *
 	 * @see setNumberOfDecodingIterations(int)
 	 */
-	int ProtectedMinutiaeTemplate::getNumberOfDecodingIterations() const {
+	int ProtectedMinutiaeTemplate::getNumberOfDecodingIterations() const
+	{
 		return this->D;
 	}
 
@@ -1599,7 +1664,8 @@ namespace thimble {
 	 *             The vector of hexagonal grid points covering the region
 	 *             in which absolutely pre-aligned minutiae can occur.
 	 */
-	const vector< pair<double,double> > & ProtectedMinutiaeTemplate::getGrid() const {
+	const vector<pair<double, double>> &ProtectedMinutiaeTemplate::getGrid() const
+	{
 		return this->grid;
 	}
 
@@ -1614,7 +1680,8 @@ namespace thimble {
 	 *             computations with the improved fuzzy vault scheme are
 	 *             performed to protect a minutiae template.
 	 */
-	const SmallBinaryField & ProtectedMinutiaeTemplate::getField() const {
+	const SmallBinaryField &ProtectedMinutiaeTemplate::getField() const
+	{
 		return this->gfPtr[0];
 	}
 
@@ -1634,9 +1701,11 @@ namespace thimble {
 	 *
 	 * @see getVaultData()
 	 */
-	int ProtectedMinutiaeTemplate::getVaultDataSize() const {
+	int ProtectedMinutiaeTemplate::getVaultDataSize() const
+	{
 
-		if ( !isEnrolled() ) {
+		if (!isEnrolled())
+		{
 			return 0;
 		}
 
@@ -1711,11 +1780,15 @@ namespace thimble {
 	 * @see encrypt()
 	 * @see decrypt()
 	 */
-	const uint8_t * ProtectedMinutiaeTemplate::getVaultData() const {
+	const uint8_t *ProtectedMinutiaeTemplate::getVaultData() const
+	{
 
-		if ( this->vaultPolynomialData != NULL ) {
+		if (this->vaultPolynomialData != NULL)
+		{
 			return this->vaultPolynomialData;
-		} else if ( this->encryptedVaultPolynomialData != NULL ) {
+		}
+		else if (this->encryptedVaultPolynomialData != NULL)
+		{
 			return this->encryptedVaultPolynomialData;
 		}
 
@@ -1775,18 +1848,19 @@ namespace thimble {
 	 *            will be printed to <code>stderr</code> and the program
 	 *            exits with status 'EXIT_FAILURE'.
 	 */
-	SmallBinaryFieldPolynomial ProtectedMinutiaeTemplate::unpackVaultPolynomial
-	( const BigInteger & slowDownValue ) const {
+	SmallBinaryFieldPolynomial ProtectedMinutiaeTemplate::unpackVaultPolynomial(const BigInteger &slowDownValue) const
+	{
 
-
-		if ( !isDecrypted() ) {
+		if (!isDecrypted())
+		{
 			cerr << "ProtectedMinutiaeTemplate::unpackVaultPolynomial: "
 				 << "no decrypted vault data." << endl;
 			exit(EXIT_FAILURE);
 		}
 
-		if ( slowDownValue.sign() < 0 ||
-			 BigInteger::compare(slowDownValue,getSlowDownFactor()) >= 0 ) {
+		if (slowDownValue.sign() < 0 ||
+			BigInteger::compare(slowDownValue, getSlowDownFactor()) >= 0)
+		{
 			cerr << "ProtectedMinutiaeTemplate::unpackVaultPolynomial: "
 				 << "slow-down value must be positive and smaller than the "
 				 << "slow-down factor" << endl;
@@ -1795,28 +1869,30 @@ namespace thimble {
 
 		AES128 aes = deriveKey(slowDownValue);
 
-		int t , d , n;
+		int t, d, n;
 		t = this->t;
 		d = this->gfPtr->getDegree();
 		n = vaultDataSize();
 
-		uint8_t *data = (uint8_t*)malloc( n * sizeof(uint8_t) );
-		uint32_t *coeffs = (uint32_t*)malloc( t * sizeof(uint32_t ) );
-		if ( data == NULL || coeffs == NULL ) {
+		uint8_t *data = (uint8_t *)malloc(n * sizeof(uint8_t));
+		uint32_t *coeffs = (uint32_t *)malloc(t * sizeof(uint32_t));
+		if (data == NULL || coeffs == NULL)
+		{
 			cerr << "ProtectedMinutiaeTemplate::createVaultPolynomialCandidate: "
 				 << "out of memory." << endl;
 			exit(EXIT_FAILURE);
 		}
 
-		aes.decrypt(data,this->vaultPolynomialData,n);
+		aes.decrypt(data, this->vaultPolynomialData, n);
 
 		// Unpack decrypted data into coefficient vector
-		split_into_bit_vectors(coeffs,data,t,d);
+		split_into_bit_vectors(coeffs, data, t, d);
 
 		SmallBinaryFieldPolynomial V(getField());
-		V.setCoeff(t,1);
-		for ( int j = 0 ; j < t ; j++ ) {
-			V.setCoeff(j,coeffs[j]);
+		V.setCoeff(t, 1);
+		for (int j = 0; j < t; j++)
+		{
+			V.setCoeff(j, coeffs[j]);
 		}
 
 		free(data);
@@ -1850,7 +1926,8 @@ namespace thimble {
 	 *
 	 * @see setSlowDownFactor()
 	 */
-	const BigInteger & ProtectedMinutiaeTemplate::getSlowDownFactor() const {
+	const BigInteger &ProtectedMinutiaeTemplate::getSlowDownFactor() const
+	{
 
 		return this->slowDownFactor;
 	}
@@ -1871,13 +1948,15 @@ namespace thimble {
 	 *             <code>stderr</code> and the program exits with status
 	 *             -1.
 	 */
-	const uint8_t *ProtectedMinutiaeTemplate::getHash() const {
+	const uint8_t *ProtectedMinutiaeTemplate::getHash() const
+	{
 
 		// Hash value of secret polynomial is extracted on enrollment
-		if  ( !isEnrolled() ) {
+		if (!isEnrolled())
+		{
 			cerr << "ProtectedMinutiaeTemplate::getHash(): "
 				 << "not enrolled." << endl;
-            exit(EXIT_FAILURE);
+			exit(EXIT_FAILURE);
 		}
 
 		return this->hash;
@@ -1909,15 +1988,17 @@ namespace thimble {
 	 * @warning
 	 *             If not enough memory could be provided, an error
 	 *             message is printed to <code>stderr</code> and the
-     *             program exits with status 'EXIT_FAILURE'.
+	 *             program exits with status 'EXIT_FAILURE'.
 	 */
-	void ProtectedMinutiaeTemplate::setDimension( int width , int height ) {
+	void ProtectedMinutiaeTemplate::setDimension(int width, int height)
+	{
 
 		// Ensure that this instance is empty
-		if ( isEnrolled() ) {
+		if (isEnrolled())
+		{
 			cerr << "ProtectedMinutiaeTemplate::setDimension: "
 				 << "clear first." << endl;
-            exit(EXIT_FAILURE);
+			exit(EXIT_FAILURE);
 		}
 
 		// A change of the dimension may require an update of the grid
@@ -1937,7 +2018,8 @@ namespace thimble {
 	 *
 	 * @see getFingerPosition()
 	 */
-	void ProtectedMinutiaeTemplate::setFingerPosition( FINGER_POSITION_T fingerPosition ) {
+	void ProtectedMinutiaeTemplate::setFingerPosition(FINGER_POSITION_T fingerPosition)
+	{
 		this->fingerPosition = fingerPosition;
 	}
 
@@ -1956,13 +2038,15 @@ namespace thimble {
 	 *             If <code>dpi</code> is smaller than 300 or greater
 	 *             than 1000, an error message is printed to
 	 *             <code>stderr</code> and the program exits with
-     *             status 'EXIT_FAILURE'.
+	 *             status 'EXIT_FAILURE'.
 	 */
-	void ProtectedMinutiaeTemplate::setResolution( int dpi ) {
+	void ProtectedMinutiaeTemplate::setResolution(int dpi)
+	{
 
-		if ( dpi < 300 || dpi > 1000 ) {
+		if (dpi < 300 || dpi > 1000)
+		{
 			cerr << "ProtectedMinutiaeTemplate::setResolution: resolution must vary between 300 and 1000 dots per inch." << endl;
-            exit(EXIT_FAILURE);
+			exit(EXIT_FAILURE);
 		}
 
 		this->dpi = dpi;
@@ -1998,20 +2082,23 @@ namespace thimble {
 	 *             message is printed to <code>stderr</code> and the
 	 *             program exits with status 'EXIT_FAILURE'.
 	 */
-	void ProtectedMinutiaeTemplate::setGridDist( int gridDist ) {
+	void ProtectedMinutiaeTemplate::setGridDist(int gridDist)
+	{
 
 		// Ensure that this instance is empty
-		if ( isEnrolled() ) {
+		if (isEnrolled())
+		{
 			cerr << "ProtectedMinutiaeTemplate::setGridDist: "
 				 << "clear first." << endl;
-            exit(EXIT_FAILURE);
+			exit(EXIT_FAILURE);
 		}
 
 		// Ensure reasonable bounds of the hexagonal grid's distance
-		if ( gridDist <= 0 ) {
+		if (gridDist <= 0)
+		{
 			cerr << "ProtectedMinutiaeTemplate::setGridDist: "
 				 << "must be greater than zero." << endl;
-            exit(EXIT_FAILURE);
+			exit(EXIT_FAILURE);
 		}
 
 		this->gridDist = gridDist;
@@ -2041,32 +2128,35 @@ namespace thimble {
 	 * @warning
 	 *             If \link isEnrolled()\endlink is <code>true</code>, the
 	 *             method prints an error message to <code>stderr</code>
-     *             and exits with status 'EXIT_FAILURE'.
+	 *             and exits with status 'EXIT_FAILURE'.
 	 *
 	 * @warning
 	 *             If <i>s</i> is smaller than or equals 0, the function
 	 *             prints an error message to <code>stderr</code> and exits
-     *             with status 'EXIT_FAILURE'.
+	 *             with status 'EXIT_FAILURE'.
 	 *
 	 * @warning
 	 *             If not enough memory could be provided, an error
 	 *             message is printed to <code>stderr</code> and the
-     *             program exits with status 'EXIT_FAILURE'.
+	 *             program exits with status 'EXIT_FAILURE'.
 	 */
-	void ProtectedMinutiaeTemplate::setNumAngleQuanta( int s ) {
+	void ProtectedMinutiaeTemplate::setNumAngleQuanta(int s)
+	{
 
 		// Ensure that this instance is empty
-		if ( isEnrolled() ) {
+		if (isEnrolled())
+		{
 			cerr << "ProtectedMinutiaeTemplate::setNumAngleQuanta: "
 				 << "clear first." << endl;
-            exit(EXIT_FAILURE);
+			exit(EXIT_FAILURE);
 		}
 
 		// Ensure reasonable bounds of quanta size
-		if ( s <= 0 ) {
+		if (s <= 0)
+		{
 			cerr << "ProtectedMinutiaeTemplate::setNumAngleQuanta: "
 				 << "must be greater than zero." << endl;
-            exit(EXIT_FAILURE);
+			exit(EXIT_FAILURE);
 		}
 
 		this->s = s;
@@ -2090,27 +2180,30 @@ namespace thimble {
 	 * @warning
 	 *             If \link isEnrolled()\endlink is <code>true</code>, the
 	 *             method prints an error message to <code>stderr</code>
-     *             and exits with status 'EXIT_FAILURE'.
+	 *             and exits with status 'EXIT_FAILURE'.
 	 *
 	 * @warning
 	 *             If <i>k</i> is smaller than or equals 0, the method
 	 *             prints an error message to <code>stderr</code> and
-     *             exits with status 'EXIT_FAILURE'.
+	 *             exits with status 'EXIT_FAILURE'.
 	 */
-	void ProtectedMinutiaeTemplate::setSecretSize( int k ) {
+	void ProtectedMinutiaeTemplate::setSecretSize(int k)
+	{
 
 		// Ensure that this instance is empty
-		if ( isEnrolled() ) {
+		if (isEnrolled())
+		{
 			cerr << "ProtectedMinutiaeTemplate::setSecretSize: "
 				 << "already enrolled; clear the view first." << endl;
-            exit(EXIT_FAILURE);
+			exit(EXIT_FAILURE);
 		}
 
 		// Ensure reasonable bounds
-		if ( k <= 0 ) {
+		if (k <= 0)
+		{
 			cerr << "ProtectedMinutiaeTemplate::setSecretSize: "
 				 << "Must be greater than zero." << endl;
-            exit(EXIT_FAILURE);
+			exit(EXIT_FAILURE);
 		}
 
 		this->k = k;
@@ -2132,27 +2225,30 @@ namespace thimble {
 	 * @warning
 	 *             If \link isEnrolled()\endlink is <code>true</code>,
 	 *             the method prints an error message to
-     *             <code>stderr</code> and exits with status 'EXIT_FAILURE'.
+	 *             <code>stderr</code> and exits with status 'EXIT_FAILURE'.
 	 *
 	 * @warning
 	 *             If <code>tmax</code> is smaller than or equals 0, the
 	 *             method prints an error message to <code>stderr</code>
-     *             and exits with status 'EXIT_FAILURE'.
+	 *             and exits with status 'EXIT_FAILURE'.
 	 */
-	void ProtectedMinutiaeTemplate::setMaxGenuineFeatures( int tmax ) {
+	void ProtectedMinutiaeTemplate::setMaxGenuineFeatures(int tmax)
+	{
 
 		// Ensure that this instance is empty
-		if ( isEnrolled() ) {
+		if (isEnrolled())
+		{
 			cerr << "ProtectedMinutiaeTemplate::setMaxGenuineFeatures: "
 				 << "clear the view first." << endl;
-            exit(EXIT_FAILURE);
+			exit(EXIT_FAILURE);
 		}
 
 		// Ensure reasonable bounds
-		if ( tmax <= 0 ) {
+		if (tmax <= 0)
+		{
 			cerr << "ProtectedMinutiaeTempalte::setMaxGenuineFeatures: "
 				 << "must be greater than zero." << endl;
-            exit(EXIT_FAILURE);
+			exit(EXIT_FAILURE);
 		}
 
 		this->tmax = tmax;
@@ -2174,15 +2270,17 @@ namespace thimble {
 	 * @warning
 	 *             If <i>D</i> is smaller than or equals 0, the method
 	 *             prints an error message to <code>stderr</code> and
-     *             exits with status 'EXIT_FAILURE'.
+	 *             exits with status 'EXIT_FAILURE'.
 	 */
-	void ProtectedMinutiaeTemplate::setNumberOfDecodingIterations( int D ) {
+	void ProtectedMinutiaeTemplate::setNumberOfDecodingIterations(int D)
+	{
 
 		// Ensure reasonable bounds
-		if ( D <= 0 ) {
+		if (D <= 0)
+		{
 			cerr << "ProtectedMinutiaeTemplate::setNumberOfDecodingIterations: "
 				 << "must be greater than 0." << endl;
-            exit(EXIT_FAILURE);
+			exit(EXIT_FAILURE);
 		}
 
 		this->D = D;
@@ -2226,15 +2324,18 @@ namespace thimble {
 	 *            error message will be printed to <code>stderr</code>
 	 *            and the program exits with status 'EXIT_FAILURE'.
 	 */
-	void ProtectedMinutiaeTemplate::setSlowDownFactor( const BigInteger & slowDownFactor ) {
+	void ProtectedMinutiaeTemplate::setSlowDownFactor(const BigInteger &slowDownFactor)
+	{
 
-		if ( slowDownFactor.sign() <= 0 ) {
+		if (slowDownFactor.sign() <= 0)
+		{
 			cerr << "ProtectedMinutiaeTemplate::setSlowDownFactor: argument "
 				 << "must not be zero or negative." << endl;
 			exit(EXIT_FAILURE);
 		}
 
-		if ( isEnrolled() ) {
+		if (isEnrolled())
+		{
 			cerr << "ProtectedMinutiaeTemplate::setSlowDownFactor: "
 				 << "parameter must be specified before enrolment." << endl;
 			exit(EXIT_FAILURE);
@@ -2259,7 +2360,8 @@ namespace thimble {
 	 *             \link enroll()\endlink, he must clear it first via
 	 *             this method.
 	 */
-	void ProtectedMinutiaeTemplate::clear() {
+	void ProtectedMinutiaeTemplate::clear()
+	{
 
 		// Free any data holding the (encrypted) vault.
 		free(this->vaultPolynomialData);
@@ -2270,7 +2372,7 @@ namespace thimble {
 		this->encryptedVaultPolynomialData = NULL;
 
 		// zero 160 bit hash value
-		memset(this->hash,0,20);
+		memset(this->hash, 0, 20);
 
 		// There is no count for the non-leading coefficients
 		// in the vault polynomial thus set to -1.
@@ -2289,34 +2391,36 @@ namespace thimble {
 	 * @warning
 	 *             If \link isEnrolled()\endlink is <code>false</code>, this
 	 *             function prints an error message to <code>stderr</code>
-     *             and exits with status 'EXIT_FAILURE'.
+	 *             and exits with status 'EXIT_FAILURE'.
 	 */
-	int ProtectedMinutiaeTemplate::getSizeInBytes() const {
+	int ProtectedMinutiaeTemplate::getSizeInBytes() const
+	{
 
-		if ( !isEnrolled() ) {
+		if (!isEnrolled())
+		{
 			cerr << "ProtectedMinutiaeTemplate::getSizeInBytes: "
 				 << "not enrolled." << endl;
-            exit(EXIT_FAILURE);
+			exit(EXIT_FAILURE);
 		}
 
 		int size = 0;
 
-		size += 10; // size for the header
-		size += 2; // size to encode 'width'
-		size += 2; // size to encode 'height'
-		size += 1; // size to encode 'fingerPosition'
-		size += 2; // size to encode 'dpi'
-		size += 1; // size to encode 'gridDist'
-		size += 1; // size to encode 's'
-		size += 1; // size to encode 'k'
-		size += 1; // size to encode 'tmax'
-		size += 4; // size to encode 'D'
-		size += 4; // size to encode generator polynomial of finite field
-		size += 1; // size to encode 't'
-		size += 1; // size to encode whether vault is encrypted or not
-		size += 4+this->slowDownFactor.getSizeInBytes(); // size to encode the slow-down factor
-		size += vaultDataSize(); // size to encoded vault data.
-		size += 20; // size to encode hash value of secret polynomial
+		size += 10;										   // size for the header
+		size += 2;										   // size to encode 'width'
+		size += 2;										   // size to encode 'height'
+		size += 1;										   // size to encode 'fingerPosition'
+		size += 2;										   // size to encode 'dpi'
+		size += 1;										   // size to encode 'gridDist'
+		size += 1;										   // size to encode 's'
+		size += 1;										   // size to encode 'k'
+		size += 1;										   // size to encode 'tmax'
+		size += 4;										   // size to encode 'D'
+		size += 4;										   // size to encode generator polynomial of finite field
+		size += 1;										   // size to encode 't'
+		size += 1;										   // size to encode whether vault is encrypted or not
+		size += 4 + this->slowDownFactor.getSizeInBytes(); // size to encode the slow-down factor
+		size += vaultDataSize();						   // size to encoded vault data.
+		size += 20;										   // size to encode hash value of secret polynomial
 
 		return size;
 	}
@@ -2336,120 +2440,136 @@ namespace thimble {
 	 * @warning
 	 *             If \link isEnrolled()\endlink is <code>false</code>, this
 	 *             function prints an error message to <code>stderr</code>
-     *             and exits with status 'EXIT_FAILURE'.
+	 *             and exits with status 'EXIT_FAILURE'.
 	 *
 	 * @warning
 	 *             If <code>data</code> cannot hold at least
 	 *             \link getSizeInBytes()\endlink bytes, the function runs
 	 *             into undocumented behavior.
 	 */
-	int ProtectedMinutiaeTemplate::toBytes( uint8_t *data ) const {
+	int ProtectedMinutiaeTemplate::toBytes(uint8_t *data) const
+	{
 
-		if ( !isEnrolled() ) {
+		if (!isEnrolled())
+		{
 			cerr << "ProtectedMinutiaeTemplate::toBytes: "
 				 << "not enrolled." << endl;
-            exit(EXIT_FAILURE);
+			exit(EXIT_FAILURE);
 		}
 
 		int offset = 0;
 
 		uint32_t tmp;
 
-		memcpy(data,"PMT140818",10);
+		memcpy(data, "PMT140818", 10);
 
 		offset = 10;
 
 		// Write 'width'
 		tmp = (uint32_t)(this->width);
-		data[offset+1] = tmp & 0xFF; tmp >>= 8;
-		data[offset+0] = tmp & 0xFF;
+		data[offset + 1] = tmp & 0xFF;
+		tmp >>= 8;
+		data[offset + 0] = tmp & 0xFF;
 		offset += 2;
 
 		// Write 'height'
 		tmp = (uint32_t)(this->height);
-		data[offset+1] = tmp & 0xFF; tmp >>= 8;
-		data[offset+0] = tmp & 0xFF;
+		data[offset + 1] = tmp & 0xFF;
+		tmp >>= 8;
+		data[offset + 0] = tmp & 0xFF;
 		offset += 2;
 
 		// Write 'fingerPosition'
-		data[offset+0] = (uint8_t)(this->fingerPosition);
+		data[offset + 0] = (uint8_t)(this->fingerPosition);
 		offset += 1;
 
 		// Write 'dpi'
 		tmp = (uint32_t)(this->dpi);
-		data[offset+1] = tmp & 0xFF; tmp >>= 8;
-		data[offset+0] = tmp & 0xFF;
+		data[offset + 1] = tmp & 0xFF;
+		tmp >>= 8;
+		data[offset + 0] = tmp & 0xFF;
 		offset += 2;
 
 		// Write 'gridDist'
-		data[offset+0] = (uint8_t)(this->gridDist);
+		data[offset + 0] = (uint8_t)(this->gridDist);
 		offset += 1;
 
 		// Write 's'
-		data[offset+0] = (uint8_t)(this->s);
+		data[offset + 0] = (uint8_t)(this->s);
 		offset += 1;
 
 		// Write 'k'
-		data[offset+0] = (uint8_t)(this->k);
+		data[offset + 0] = (uint8_t)(this->k);
 		offset += 1;
 
 		// Write 'tmax'
-		data[offset+0] = (uint8_t)(this->tmax);
+		data[offset + 0] = (uint8_t)(this->tmax);
 		offset += 1;
 
 		// Write 'D'
 		tmp = (uint32_t)(this->D);
-		data[offset+3] = tmp & 0xFF; tmp >>= 8;
-		data[offset+2] = tmp & 0xFF; tmp >>= 8;
-		data[offset+1] = tmp & 0xFF; tmp >>= 8;
-		data[offset+0] = tmp & 0xFF;
+		data[offset + 3] = tmp & 0xFF;
+		tmp >>= 8;
+		data[offset + 2] = tmp & 0xFF;
+		tmp >>= 8;
+		data[offset + 1] = tmp & 0xFF;
+		tmp >>= 8;
+		data[offset + 0] = tmp & 0xFF;
 		offset += 4;
 
 		// Write finite field generator polynomial
 		tmp = (uint32_t)(this->gfPtr->getDefiningPolynomial().rep);
-		data[offset+3] = tmp & 0xFF; tmp >>= 8;
-		data[offset+2] = tmp & 0xFF; tmp >>= 8;
-		data[offset+1] = tmp & 0xFF; tmp >>= 8;
-		data[offset+0] = tmp & 0xFF;
+		data[offset + 3] = tmp & 0xFF;
+		tmp >>= 8;
+		data[offset + 2] = tmp & 0xFF;
+		tmp >>= 8;
+		data[offset + 1] = tmp & 0xFF;
+		tmp >>= 8;
+		data[offset + 0] = tmp & 0xFF;
 		offset += 4;
 
 		// Write 't'
-		data[offset+0] = (uint8_t)(this->t);
+		data[offset + 0] = (uint8_t)(this->t);
 		offset += 1;
 
 		// Write data size for 'slowDownFactor'
 		tmp = (uint32_t)(this->slowDownFactor.getSizeInBytes());
-		data[offset+3] = tmp & 0xFF; tmp >>= 8;
-		data[offset+2] = tmp & 0xFF; tmp >>= 8;
-		data[offset+1] = tmp & 0xFF; tmp >>= 8;
-		data[offset+0] = tmp & 0xFF;
+		data[offset + 3] = tmp & 0xFF;
+		tmp >>= 8;
+		data[offset + 2] = tmp & 0xFF;
+		tmp >>= 8;
+		data[offset + 1] = tmp & 0xFF;
+		tmp >>= 8;
+		data[offset + 0] = tmp & 0xFF;
 		offset += 4;
 
 		// Write data of 'slowDownFactor'
-		this->slowDownFactor.toBytes(data+offset);
+		this->slowDownFactor.toBytes(data + offset);
 		offset += this->slowDownFactor.getSizeInBytes();
 
 		// Write encrypted/unencrypted vault data
 		int n = vaultDataSize();
-		if ( containsEncryptedData() ) {
+		if (containsEncryptedData())
+		{
 
 			data[offset] = 1;
 			offset++;
 
-			memcpy(data+offset,this->encryptedVaultPolynomialData,n);
-
-		} else {
+			memcpy(data + offset, this->encryptedVaultPolynomialData, n);
+		}
+		else
+		{
 
 			data[offset] = 0;
 			offset++;
 
-			memcpy(data+offset,this->vaultPolynomialData,n);
+			memcpy(data + offset, this->vaultPolynomialData, n);
 		}
 
 		offset += n;
 
 		// Write seed of secret polynomial
-		memcpy(data+offset,this->hash,20);
+		memcpy(data + offset, this->hash, 20);
 		offset += 20;
 
 		return offset;
@@ -2485,26 +2605,31 @@ namespace thimble {
 	 * @warning
 	 *             If not enough memory could be provided, an error
 	 *             message is printed to <code>stderr</code> and the
-     *             program exits with status 'EXIT_FAILURE'.
+	 *             program exits with status 'EXIT_FAILURE'.
 	 */
-	int ProtectedMinutiaeTemplate::fromBytes( const uint8_t *data , int size ) {
+	int ProtectedMinutiaeTemplate::fromBytes(const uint8_t *data, int size)
+	{
 
 		int offset = 0;
 
-		if ( size < offset+10 ) {
+		if (size < offset + 10)
+		{
 			return -1;
 		}
 
 		ProtectedMinutiaeTemplate tmp;
 
 		{ // Check if header is valid
-			if ( data[0] != 'P' || data[1] != 'M' || data[2] != 'T' ||
-				 data[9] != '\0') {
+			if (data[0] != 'P' || data[1] != 'M' || data[2] != 'T' ||
+				data[9] != '\0')
+			{
 				return -1;
 			}
 
-			for ( int j = 3 ; j < 9 ; j++ ) {
-				if ( !isdigit(data[j]) ) {
+			for (int j = 3; j < 9; j++)
+			{
+				if (!isdigit(data[j]))
+				{
 					return -1;
 				}
 			}
@@ -2513,59 +2638,119 @@ namespace thimble {
 		offset += 10;
 
 		// Read and check 'width'
-		if ( size < offset+2 ) { return -1; }
-		tmp.width = (int)data[offset]; tmp.width <<= 8; tmp.width += (int)data[offset+1];
-		if ( tmp.width == 0 ) { return -1; }
+		if (size < offset + 2)
+		{
+			return -1;
+		}
+		tmp.width = (int)data[offset];
+		tmp.width <<= 8;
+		tmp.width += (int)data[offset + 1];
+		if (tmp.width == 0)
+		{
+			return -1;
+		}
 		offset += 2;
 
 		// Read 'height'
-		if ( size < offset+2 ) { return -1; }
-		tmp.height = (int)data[offset]; tmp.height <<= 8; tmp.height += (int)data[offset+1];
-		if ( tmp.height == 0 ) { return -1; }
+		if (size < offset + 2)
+		{
+			return -1;
+		}
+		tmp.height = (int)data[offset];
+		tmp.height <<= 8;
+		tmp.height += (int)data[offset + 1];
+		if (tmp.height == 0)
+		{
+			return -1;
+		}
 		offset += 2;
 
 		// Check and read 'fingerPosition'
-		if ( size < offset+1 ) { return -1; }
-		if ( (int)data[offset] > 10 ) { return -1; }
+		if (size < offset + 1)
+		{
+			return -1;
+		}
+		if ((int)data[offset] > 10)
+		{
+			return -1;
+		}
 		tmp.fingerPosition = (FINGER_POSITION_T)data[offset];
 		offset += 1;
 
 		// Read and check 'dpi'
-		if ( size < offset+2 ) { return -1; }
-		tmp.dpi = (int)data[offset]; tmp.dpi <<= 8; tmp.dpi += data[offset+1];
-		if ( tmp.dpi < 300 || tmp.dpi > 1000 ) { return -1; }
+		if (size < offset + 2)
+		{
+			return -1;
+		}
+		tmp.dpi = (int)data[offset];
+		tmp.dpi <<= 8;
+		tmp.dpi += data[offset + 1];
+		if (tmp.dpi < 300 || tmp.dpi > 1000)
+		{
+			return -1;
+		}
 		offset += 2;
 
 		// Read and check 'gridDist'
-		if ( size < offset+1 ) { return -1; }
+		if (size < offset + 1)
+		{
+			return -1;
+		}
 		tmp.gridDist = (int)data[offset];
-		if ( tmp.gridDist == 0 ) { return -1; }
+		if (tmp.gridDist == 0)
+		{
+			return -1;
+		}
 		offset += 1;
 
 		// Read and check 's'
-		if ( size < offset+1 ) { return -1; }
+		if (size < offset + 1)
+		{
+			return -1;
+		}
 		tmp.s = (int)data[offset];
-		if ( tmp.s == 0 ) { return -1; }
+		if (tmp.s == 0)
+		{
+			return -1;
+		}
 		offset += 1;
 
 		// Read and check 'k'
-		if ( size < offset+1 ) { return -1; }
+		if (size < offset + 1)
+		{
+			return -1;
+		}
 		tmp.k = (int)data[offset];
-		if ( tmp.k == 0 ) { return -1; }
+		if (tmp.k == 0)
+		{
+			return -1;
+		}
 		offset += 1;
 
 		// Read 'tmax' and check
-		if ( size < offset+1 ) { return -1; }
+		if (size < offset + 1)
+		{
+			return -1;
+		}
 		tmp.tmax = (int)data[offset];
-		if ( tmp.tmax == 0 || tmp.k > tmp.tmax ) { return -1; }
+		if (tmp.tmax == 0 || tmp.k > tmp.tmax)
+		{
+			return -1;
+		}
 		offset += 1;
 
 		// Read 'D'
-		if ( size < offset+4 ) { return -1; }
-		tmp.D  = (int)data[offset+0]; tmp.D <<= 8;
-		tmp.D += (int)data[offset+1]; tmp.D <<= 8;
-		tmp.D += (int)data[offset+2]; tmp.D <<= 8;
-		tmp.D += (int)data[offset+3];
+		if (size < offset + 4)
+		{
+			return -1;
+		}
+		tmp.D = (int)data[offset + 0];
+		tmp.D <<= 8;
+		tmp.D += (int)data[offset + 1];
+		tmp.D <<= 8;
+		tmp.D += (int)data[offset + 2];
+		tmp.D <<= 8;
+		tmp.D += (int)data[offset + 3];
 		offset += 4;
 
 		// Build the grid
@@ -2573,82 +2758,111 @@ namespace thimble {
 
 		// Read the finite field
 		{
-			if ( size < offset+4 ) { return -1; }
+			if (size < offset + 4)
+			{
+				return -1;
+			}
 
 			uint32_t rep;
-			rep  = (uint32_t)data[offset+0]; rep <<= 8;
-			rep += (uint32_t)data[offset+1]; rep <<= 8;
-			rep += (uint32_t)data[offset+2]; rep <<= 8;
-			rep += (uint32_t)data[offset+3];
+			rep = (uint32_t)data[offset + 0];
+			rep <<= 8;
+			rep += (uint32_t)data[offset + 1];
+			rep <<= 8;
+			rep += (uint32_t)data[offset + 2];
+			rep <<= 8;
+			rep += (uint32_t)data[offset + 3];
 			offset += 4;
 
-
-			if ( this->gfPtr != NULL && this->gfPtr->getDefiningPolynomial().rep == rep ) {
-				tmp.gfPtr = new(nothrow) SmallBinaryField(this->gfPtr[0]);
-			} else {
-				tmp.gfPtr = new(nothrow) SmallBinaryField(SmallBinaryPolynomial(rep));
+			if (this->gfPtr != NULL && this->gfPtr->getDefiningPolynomial().rep == rep)
+			{
+				tmp.gfPtr = new (nothrow) SmallBinaryField(this->gfPtr[0]);
 			}
-			if ( tmp.gfPtr == NULL ) {
+			else
+			{
+				tmp.gfPtr = new (nothrow) SmallBinaryField(SmallBinaryPolynomial(rep));
+			}
+			if (tmp.gfPtr == NULL)
+			{
 				cerr << "ProtectedMinutiaeTemplate::fromBytes: out of memory." << endl;
-                exit(EXIT_FAILURE);
+				exit(EXIT_FAILURE);
 			}
 
-			if ( (int)(tmp.gfPtr->getCardinality()) < this->s * (int)tmp.grid.size() ) {
+			if ((int)(tmp.gfPtr->getCardinality()) < this->s * (int)tmp.grid.size())
+			{
 				return -1;
 			}
 		}
 
 		// Read 't'
-		if ( size < offset+1 ) { return -1; }
+		if (size < offset + 1)
+		{
+			return -1;
+		}
 		tmp.t = (int)data[offset];
 		offset += 1;
 
 		// Read slow-down factor
 		{
-			if ( size < offset+4 ) { return -1; }
+			if (size < offset + 4)
+			{
+				return -1;
+			}
 			int sizeOfSlowDownFactor;
-			sizeOfSlowDownFactor  = (int)data[offset+0]; sizeOfSlowDownFactor <<= 8;
-			sizeOfSlowDownFactor += (int)data[offset+1]; sizeOfSlowDownFactor <<= 8;
-			sizeOfSlowDownFactor += (int)data[offset+2]; sizeOfSlowDownFactor <<= 8;
-			sizeOfSlowDownFactor += (int)data[offset+3];
+			sizeOfSlowDownFactor = (int)data[offset + 0];
+			sizeOfSlowDownFactor <<= 8;
+			sizeOfSlowDownFactor += (int)data[offset + 1];
+			sizeOfSlowDownFactor <<= 8;
+			sizeOfSlowDownFactor += (int)data[offset + 2];
+			sizeOfSlowDownFactor <<= 8;
+			sizeOfSlowDownFactor += (int)data[offset + 3];
 			offset += 4;
-			if ( size < offset+sizeOfSlowDownFactor ) { return -1; }
-			tmp.slowDownFactor.fromBytes(data+offset,sizeOfSlowDownFactor);
+			if (size < offset + sizeOfSlowDownFactor)
+			{
+				return -1;
+			}
+			tmp.slowDownFactor.fromBytes(data + offset, sizeOfSlowDownFactor);
 			offset += sizeOfSlowDownFactor;
 		}
 
-
 		// Test whether there is enough data provided.
 		int n = tmp.vaultDataSize();
-		if ( size < offset+n+1 ) {
+		if (size < offset + n + 1)
+		{
 			return -1;
 		}
 
 		// Allocate memory for reading encrypted/unencrypted vault data
-		uint8_t *vaultData = (uint8_t*)malloc( n * sizeof(uint8_t) );
-		if ( vaultData == NULL ) {
+		uint8_t *vaultData = (uint8_t *)malloc(n * sizeof(uint8_t));
+		if (vaultData == NULL)
+		{
 			cerr << "ProtectedMinutiaeTemplate::fromBytes: "
 				 << "out of memory." << endl;
 			exit(EXIT_FAILURE);
 		}
 
 		// Read data
-		memcpy(vaultData,data+offset+1,n);
-		if ( data[offset] != 0 ) {
+		memcpy(vaultData, data + offset + 1, n);
+		if (data[offset] != 0)
+		{
 			tmp.encryptedVaultPolynomialData = vaultData;
-		} else {
+		}
+		else
+		{
 			tmp.vaultPolynomialData = vaultData;
 		}
-		offset += n+1;
+		offset += n + 1;
 
 		// Read 'hash'
-		if ( size < offset+20 ) { return -1; }
-		memcpy(tmp.hash,data+offset,20);
+		if (size < offset + 20)
+		{
+			return -1;
+		}
+		memcpy(tmp.hash, data + offset, 20);
 		offset += 20;
 
 		tmp.updatePermutation();
 
-		swap(*this,tmp);
+		swap(*this, tmp);
 
 		return offset;
 	}
@@ -2669,32 +2883,34 @@ namespace thimble {
 	 * @warning
 	 *             If \link isEnrolled()\endlink is <code>false</code>, this
 	 *             function prints an error message to <code>stderr</code>
-     *             and exits with status 'EXIT_FAILURE'.
+	 *             and exits with status 'EXIT_FAILURE'.
 	 *
 	 * @warning
 	 *             If not enough memory could be provided, an error
 	 *             message is printed to <code>stderr</code> and the
-     *             program exits with status 'EXIT_FAILURE'.
+	 *             program exits with status 'EXIT_FAILURE'.
 	 */
-	int ProtectedMinutiaeTemplate::write( FILE *out ) const {
+	int ProtectedMinutiaeTemplate::write(FILE *out) const
+	{
 
 		uint8_t *data;
-		int size , wsize;
+		int size, wsize;
 
 		// Initialize byte array ...
 		size = getSizeInBytes();
-		data = (uint8_t*)malloc( size * sizeof(uint8_t) );
-		if ( data == NULL ) {
+		data = (uint8_t *)malloc(size * sizeof(uint8_t));
+		if (data == NULL)
+		{
 			cerr << "ProtectedMinutiaeTemplate::write: "
 				 << "out of memory." << endl;
-            exit(EXIT_FAILURE);
+			exit(EXIT_FAILURE);
 		}
 
 		// ... in which this protected minutiae template is packed.
 		toBytes(data);
 
 		// Write the byte array to 'out'.
-		wsize = fwrite(data,sizeof(uint8_t),size,out);
+		wsize = fwrite(data, sizeof(uint8_t), size, out);
 
 		free(data);
 
@@ -2719,21 +2935,23 @@ namespace thimble {
 	 * @warning
 	 *             If \link isEnrolled()\endlink is <code>false</code>, this
 	 *             function prints an error message to <code>stderr</code>
-     *             and exits with status 'EXIT_FAILURE'.
+	 *             and exits with status 'EXIT_FAILURE'.
 	 *
 	 * @warning
 	 *             If not enough memory could be provided, an error
 	 *             message is printed to <code>stderr</code> and the
-     *             program exits with status 'EXIT_FAILURE'.
+	 *             program exits with status 'EXIT_FAILURE'.
 	 */
-	bool ProtectedMinutiaeTemplate::write( const std::string & file ) const {
+	bool ProtectedMinutiaeTemplate::write(const std::string &file) const
+	{
 
 		FILE *out;
 		bool success;
 
 		// Open a FILE pointer to the specified path ...
-		out = THIMBLE_FOPEN(file.c_str(),"wb");
-		if ( out == NULL ) {
+		out = THIMBLE_FOPEN(file.c_str(), "wb");
+		if (out == NULL)
+		{
 			return false;
 		}
 
@@ -2741,9 +2959,12 @@ namespace thimble {
 		write(out);
 
 		// Check for errors ...
-		if ( ferror(out) ) {
+		if (ferror(out))
+		{
 			success = false;
-		} else {
+		}
+		else
+		{
 			success = true;
 		}
 
@@ -2780,9 +3001,10 @@ namespace thimble {
 	 * @warning
 	 *             If not enough memory could be provided, an error
 	 *             message is printed to <code>stderr</code> and the
-     *             program exits with status 'EXIT_FAILURE'.
+	 *             program exits with status 'EXIT_FAILURE'.
 	 */
-	int ProtectedMinutiaeTemplate::read( FILE *in ) {
+	int ProtectedMinutiaeTemplate::read(FILE *in)
+	{
 
 		int offset = 0;
 
@@ -2791,16 +3013,23 @@ namespace thimble {
 
 		{ // Check if header is valid
 			uint8_t header[10];
-			for ( int j = 0 ; j < 10 ; j++ ) {
-				if ( (c=fgetc(in)) < 0 ) { return -1; }
+			for (int j = 0; j < 10; j++)
+			{
+				if ((c = fgetc(in)) < 0)
+				{
+					return -1;
+				}
 				header[j] = (uint8_t)c;
 			}
-			if ( header[0] != 'P' || header[1] != 'M' || header[2] != 'T' ||
-				 header[9] != '\0' ) {
-				return-1;
+			if (header[0] != 'P' || header[1] != 'M' || header[2] != 'T' ||
+				header[9] != '\0')
+			{
+				return -1;
 			}
-			for ( int j = 3 ; j < 9 ; j++ ) {
-				if ( !isdigit(header[j]) ) {
+			for (int j = 3; j < 9; j++)
+			{
+				if (!isdigit(header[j]))
+				{
 					return -1;
 				}
 			}
@@ -2809,67 +3038,142 @@ namespace thimble {
 		offset += 10;
 
 		// Read and check 'width'
-		if ( (c=fgetc(in)) < 0 ) { return -1; }
-		tmp.width = c; tmp.width <<= 8;
-		if ( (c=fgetc(in)) < 0 ) { return -1; }
+		if ((c = fgetc(in)) < 0)
+		{
+			return -1;
+		}
+		tmp.width = c;
+		tmp.width <<= 8;
+		if ((c = fgetc(in)) < 0)
+		{
+			return -1;
+		}
 		tmp.width += c;
-		if ( tmp.width == 0 ) { return -1; }
+		if (tmp.width == 0)
+		{
+			return -1;
+		}
 		offset += 2;
 
 		// Read 'height'
-		if ( (c=fgetc(in)) < 0 ) { return -1; }
-		tmp.height = c; tmp.height <<= 8;
-		if ( (c=fgetc(in)) < 0 ) { return -1; }
+		if ((c = fgetc(in)) < 0)
+		{
+			return -1;
+		}
+		tmp.height = c;
+		tmp.height <<= 8;
+		if ((c = fgetc(in)) < 0)
+		{
+			return -1;
+		}
 		tmp.height += c;
-		if ( tmp.height == 0 ) { return -1; }
+		if (tmp.height == 0)
+		{
+			return -1;
+		}
 		offset += 2;
 
 		// Check and read 'fingerPosition'
-		if ( (c=fgetc(in)) < 0 ) { return -1; }
-		if ( c > 10 ) { return -1; }
+		if ((c = fgetc(in)) < 0)
+		{
+			return -1;
+		}
+		if (c > 10)
+		{
+			return -1;
+		}
 		tmp.fingerPosition = (FINGER_POSITION_T)c;
 		offset += 1;
 
 		// Read and check 'dpi'
-		if ( (c=fgetc(in)) < 0 ) { return -1; }
-		tmp.dpi = c; tmp.dpi <<= 8;
-		if ( (c=fgetc(in)) < 0 ) { return -1; }
+		if ((c = fgetc(in)) < 0)
+		{
+			return -1;
+		}
+		tmp.dpi = c;
+		tmp.dpi <<= 8;
+		if ((c = fgetc(in)) < 0)
+		{
+			return -1;
+		}
 		tmp.dpi += c;
-		if ( tmp.dpi < 300 || tmp.dpi > 1000 ) { return -1; }
+		if (tmp.dpi < 300 || tmp.dpi > 1000)
+		{
+			return -1;
+		}
 		offset += 2;
 
 		// Read and check 'gridDist'
-		if ( (c=fgetc(in)) < 0 ) { return -1; }
+		if ((c = fgetc(in)) < 0)
+		{
+			return -1;
+		}
 		tmp.gridDist = c;
-		if ( tmp.gridDist == 0 ) { return -1; }
+		if (tmp.gridDist == 0)
+		{
+			return -1;
+		}
 		offset += 1;
 
 		// Read and check 's'
-		if ( (c=fgetc(in)) < 0 ) { return -1; }
+		if ((c = fgetc(in)) < 0)
+		{
+			return -1;
+		}
 		tmp.s = c;
-		if ( tmp.s == 0 ) { return -1; }
+		if (tmp.s == 0)
+		{
+			return -1;
+		}
 		offset += 1;
 
 		// Read and check 'k'
-		if ( (c=fgetc(in)) < 0 ) { return -1; }
+		if ((c = fgetc(in)) < 0)
+		{
+			return -1;
+		}
 		tmp.k = c;
-		if ( tmp.k == 0 ) { return -1; }
+		if (tmp.k == 0)
+		{
+			return -1;
+		}
 		offset += 1;
 
 		// Read 'tmax' and check
-		if ( (c=fgetc(in)) < 0 ) { return -1; }
+		if ((c = fgetc(in)) < 0)
+		{
+			return -1;
+		}
 		tmp.tmax = c;
-		if ( tmp.tmax == 0 || tmp.k > tmp.tmax ) { return -1; }
+		if (tmp.tmax == 0 || tmp.k > tmp.tmax)
+		{
+			return -1;
+		}
 		offset += 1;
 
 		// Read 'D'
-		if ( (c=fgetc(in)) < 0 ) { return -1; }
-		tmp.D  = c; tmp.D <<= 8;
-		if ( (c=fgetc(in)) < 0 ) { return -1; }
-		tmp.D += c; tmp.D <<= 8;
-		if ( (c=fgetc(in)) < 0 ) { return -1; }
-		tmp.D += c; tmp.D <<= 8;
-		if ( (c=fgetc(in)) < 0 ) { return -1; }
+		if ((c = fgetc(in)) < 0)
+		{
+			return -1;
+		}
+		tmp.D = c;
+		tmp.D <<= 8;
+		if ((c = fgetc(in)) < 0)
+		{
+			return -1;
+		}
+		tmp.D += c;
+		tmp.D <<= 8;
+		if ((c = fgetc(in)) < 0)
+		{
+			return -1;
+		}
+		tmp.D += c;
+		tmp.D <<= 8;
+		if ((c = fgetc(in)) < 0)
+		{
+			return -1;
+		}
 		tmp.D += c;
 		offset += 4;
 
@@ -2879,69 +3183,109 @@ namespace thimble {
 		// Read the finite field
 		{
 			uint32_t rep;
-			if ( (c=fgetc(in)) < 0 ) { return -1; }
-			rep  = c; rep <<= 8;
-			if ( (c=fgetc(in)) < 0 ) { return -1; }
-			rep += c; rep <<= 8;
-			if ( (c=fgetc(in)) < 0 ) { return -1; }
-			rep += c; rep <<= 8;
-			if ( (c=fgetc(in)) < 0 ) { return -1; }
+			if ((c = fgetc(in)) < 0)
+			{
+				return -1;
+			}
+			rep = c;
+			rep <<= 8;
+			if ((c = fgetc(in)) < 0)
+			{
+				return -1;
+			}
+			rep += c;
+			rep <<= 8;
+			if ((c = fgetc(in)) < 0)
+			{
+				return -1;
+			}
+			rep += c;
+			rep <<= 8;
+			if ((c = fgetc(in)) < 0)
+			{
+				return -1;
+			}
 			rep += c;
 			offset += 4;
 
-			if ( this->gfPtr != NULL && this->gfPtr->getDefiningPolynomial().rep == rep ) {
-				tmp.gfPtr = new(nothrow) SmallBinaryField(this->gfPtr[0]);
-			} else {
-				tmp.gfPtr = new(nothrow) SmallBinaryField(SmallBinaryPolynomial(rep));
+			if (this->gfPtr != NULL && this->gfPtr->getDefiningPolynomial().rep == rep)
+			{
+				tmp.gfPtr = new (nothrow) SmallBinaryField(this->gfPtr[0]);
 			}
-			if ( tmp.gfPtr == NULL ) {
+			else
+			{
+				tmp.gfPtr = new (nothrow) SmallBinaryField(SmallBinaryPolynomial(rep));
+			}
+			if (tmp.gfPtr == NULL)
+			{
 				cerr << "ProtectedMinutiaeTemplate::read: out of memory." << endl;
-                exit(EXIT_FAILURE);
+				exit(EXIT_FAILURE);
 			}
 
-			if ( (int)(tmp.gfPtr->getCardinality()) < this->s * (int)tmp.grid.size() ) {
+			if ((int)(tmp.gfPtr->getCardinality()) < this->s * (int)tmp.grid.size())
+			{
 				return -1;
 			}
 		}
 
 		// Read 't'
-		if ( (c=fgetc(in)) < 0 ) { return -1; }
+		if ((c = fgetc(in)) < 0)
+		{
+			return -1;
+		}
 		tmp.t = c;
 		offset += 1;
 
 		// Read slow-down factor
 		{
 			int size;
-			if ( (c=fgetc(in)) < 0 ) { return -1; }
-			size  = c; size <<= 8;
-			if ( (c=fgetc(in)) < 0 ) { return -1; }
-			size += c; size <<= 8;
-			if ( (c=fgetc(in)) < 0 ) { return -1; }
-			size += c; size <<= 8;
-			if ( (c=fgetc(in)) < 0 ) { return -1; }
+			if ((c = fgetc(in)) < 0)
+			{
+				return -1;
+			}
+			size = c;
+			size <<= 8;
+			if ((c = fgetc(in)) < 0)
+			{
+				return -1;
+			}
+			size += c;
+			size <<= 8;
+			if ((c = fgetc(in)) < 0)
+			{
+				return -1;
+			}
+			size += c;
+			size <<= 8;
+			if ((c = fgetc(in)) < 0)
+			{
+				return -1;
+			}
 			size += c;
 			offset += 4;
 
-			uint8_t *data = (uint8_t*)malloc( size * sizeof(uint8_t) );
-			if ( data == NULL ) {
+			uint8_t *data = (uint8_t *)malloc(size * sizeof(uint8_t));
+			if (data == NULL)
+			{
 				cerr << "ProtectedMinutiaeTemplate::read: "
 					 << "out of memory." << endl;
 				exit(EXIT_FAILURE);
 			}
-			if ( fread(data,1,size,in) != (size_t)size ) {
+			if (fread(data, 1, size, in) != (size_t)size)
+			{
 				free(data);
 				return -1;
 			}
 			offset += size;
 
-			tmp.slowDownFactor.fromBytes(data,size);
+			tmp.slowDownFactor.fromBytes(data, size);
 			free(data);
 
-			if ( tmp.slowDownFactor.sign() <= 0 ) {
+			if (tmp.slowDownFactor.sign() <= 0)
+			{
 				return -1;
 			}
 		}
-
 
 		// *******************************************************************
 		// ********************** BEGIN: Read data ***************************
@@ -2949,24 +3293,33 @@ namespace thimble {
 
 		int n = tmp.vaultDataSize();
 
-		uint8_t *vaultData = (uint8_t*)malloc( n * sizeof(uint8_t) );
-		if ( vaultData == NULL ) {
+		uint8_t *vaultData = (uint8_t *)malloc(n * sizeof(uint8_t));
+		if (vaultData == NULL)
+		{
 			cerr << "ProtectedMinutiaeTemplate::read: out of memory." << endl;
 			exit(EXIT_FAILURE);
 		}
 
-		if ( (c=fgetc(in)) < 0 ) { free(vaultData); return -1; }
+		if ((c = fgetc(in)) < 0)
+		{
+			free(vaultData);
+			return -1;
+		}
 		offset += 1;
 
-		if ( fread(vaultData,1,n,in) != (size_t) n ) {
+		if (fread(vaultData, 1, n, in) != (size_t)n)
+		{
 			free(vaultData);
 			return -1;
 		}
 		offset += n;
 
-		if ( c != 0 ) {
+		if (c != 0)
+		{
 			tmp.encryptedVaultPolynomialData = vaultData;
-		} else {
+		}
+		else
+		{
 			tmp.vaultPolynomialData = vaultData;
 		}
 
@@ -2975,14 +3328,15 @@ namespace thimble {
 		// *******************************************************************
 
 		// Read 'hash'
-		if ( fread(tmp.hash,1,20,in) != 20 ) {
+		if (fread(tmp.hash, 1, 20, in) != 20)
+		{
 			return -1;
 		}
 		offset += 20;
 
 		tmp.updatePermutation();
 
-		swap(*this,tmp);
+		swap(*this, tmp);
 
 		return offset;
 	}
@@ -3012,23 +3366,28 @@ namespace thimble {
 	 * @warning
 	 *             If not enough memory could be provided, an error
 	 *             message is printed to <code>stderr</code> and the
-     *             program exits with status 'EXIT_FAILURE'.
+	 *             program exits with status 'EXIT_FAILURE'.
 	 */
-	bool ProtectedMinutiaeTemplate::read( const std::string & file ) {
+	bool ProtectedMinutiaeTemplate::read(const std::string &file)
+	{
 
 		bool success;
 
 		// Open a FILE pointer to the specified path ...
-		FILE *in = THIMBLE_FOPEN(file.c_str(),"rb");
-		if ( in == NULL ) {
+		FILE *in = THIMBLE_FOPEN(file.c_str(), "rb");
+		if (in == NULL)
+		{
 			return false;
 		}
 
 		// ... and attempt to initialize this protected minutiae template
 		// by the data from the file.
-		if ( read(in) >= 0 ) {
+		if (read(in) >= 0)
+		{
 			success = true;
-		} else {
+		}
+		else
+		{
 			success = false;
 		}
 
@@ -3047,18 +3406,21 @@ namespace thimble {
 	 * @details
 	 *            see 'ProtectedMinutiaeTemplate.h'
 	 */
-	int ProtectedMinutiaeTemplate::overlap
-	( const uint32_t *array1 , int t1 , const uint32_t *array2 , int t2 ) {
+	int ProtectedMinutiaeTemplate::overlap(const uint32_t *array1, int t1, const uint32_t *array2, int t2)
+	{
 
 		// Counts the number of common elements
 		int omega = 0;
 
 		// Iterate over all pairs
-		for ( int i = 0 ; i < t1 ; i++ ) {
-			for ( int j = 0 ; j < t2 ; j++ ) {
+		for (int i = 0; i < t1; i++)
+		{
+			for (int j = 0; j < t2; j++)
+			{
 
 				// Increment in case the two elements are equal
-				if ( array1[i] == array2[j] ) {
+				if (array1[i] == array2[j])
+				{
 					++omega;
 				}
 			}
@@ -3087,15 +3449,16 @@ namespace thimble {
 	 *            using the \link updateGrid()\endlink and
 	 *            \link updateField()\endlink functions, respectively.
 	 */
-	void ProtectedMinutiaeTemplate::first_init() {
+	void ProtectedMinutiaeTemplate::first_init()
+	{
 
 		this->t = -1;
-		this->gfPtr                        = NULL;
-		this->vaultPolynomialData          = NULL;
-		this->slowDownFactor               = BigInteger(1);
+		this->gfPtr = NULL;
+		this->vaultPolynomialData = NULL;
+		this->slowDownFactor = BigInteger(1);
 		this->encryptedVaultPolynomialData = NULL;
 
-		memset(this->hash,0,20);
+		memset(this->hash, 0, 20);
 
 		updateGrid();
 		updateField();
@@ -3146,38 +3509,39 @@ namespace thimble {
 	 *             message is printed to <code>stderr</code> and the
 	 *             program exits with status 'EXIT_FAILURE'.
 	 */
-	void ProtectedMinutiaeTemplate::first_init
-	( int width , int height , int dpi , FINGER_POSITION_T fingerPosition ) {
+	void ProtectedMinutiaeTemplate::first_init(int width, int height, int dpi, FINGER_POSITION_T fingerPosition)
+	{
 
 		// Check whether dimension is okay.
-		if ( width <= 0 || height <= 0 ) {
+		if (width <= 0 || height <= 0)
+		{
 			cerr << "ProtectedMinutiaeTemplate: Invalid image dimensions."
 				 << endl;
-            exit(EXIT_FAILURE);
+			exit(EXIT_FAILURE);
 		}
 
 		// Check whether resolution is okay
-		if ( dpi < 300 || dpi > 1000 ) {
+		if (dpi < 300 || dpi > 1000)
+		{
 			cerr << "ProtectedMinutiaeTemplate: "
 				 << "Resolution must vary between 300 and 1000 dpi." << endl;
-            exit(EXIT_FAILURE);
+			exit(EXIT_FAILURE);
 		}
 
 		// Set members specified by the user of the class.
-		this->width  = width;
+		this->width = width;
 		this->height = height;
 		this->dpi = dpi;
 		this->fingerPosition = fingerPosition;
 
-
 		this->gridDist = (int)THIMBLE_ROUND(29.0 / 569.0 * (double)dpi);
-		this->s        = 6;
-		this->k        = 10;
-		this->tmax     = 44;
+		this->s = 6;
+		this->k = 10;
+		this->tmax = 44;
 
 		// Standard value for the number of decoding iterations performed
 		// by the randomized decoder on a verification attempt.
-		this->D = 1<<16;
+		this->D = 1 << 16;
 
 		// Finish initialization
 		first_init();
@@ -3197,26 +3561,27 @@ namespace thimble {
 	 *            needs an update which is performed when calling
 	 *            this method.
 	 */
-	void ProtectedMinutiaeTemplate::updateGrid() {
+	void ProtectedMinutiaeTemplate::updateGrid()
+	{
 
 		this->grid.clear();
 
-		int maxRadius = (int)ceil(ceil
-				(sqrt((double)(width*width+height*height)))+0.5*gridDist);
+		int maxRadius = (int)ceil(ceil(sqrt((double)(width * width + height * height))) + 0.5 * gridDist);
 
 		// Create the points of a hexagonal grid of minimal distance 'gridDist'
-		HexagonalGrid hexaGrid
-			(-maxRadius,-maxRadius,maxRadius,maxRadius,this->gridDist);
+		HexagonalGrid hexaGrid(-maxRadius, -maxRadius, maxRadius, maxRadius, this->gridDist);
 
 		// Keep only those hexagonal grid points which are of a distance
 		// more than those of which absolutely pre-aligned minutiae can occur.
-		for ( int j = 0 ; j < (int)hexaGrid.getPoints().size() ; j++ ) {
+		for (int j = 0; j < (int)hexaGrid.getPoints().size(); j++)
+		{
 
-			double dx , dy;
+			double dx, dy;
 			dx = hexaGrid.getPoints().at(j).first;
 			dy = hexaGrid.getPoints().at(j).second;
 
-			if ( dx*dx+dy*dy <= maxRadius*maxRadius ) {
+			if (dx * dx + dy * dy <= maxRadius * maxRadius)
+			{
 				this->grid.push_back(hexaGrid.getPoints().at(j));
 			}
 		}
@@ -3237,9 +3602,10 @@ namespace thimble {
 	 * @warning
 	 *            If not enough memory could be provided, an error
 	 *            message is printed to <code>stderr</code> and the
-     *            program exits with status 'EXIT_FAILURE'.
+	 *            program exits with status 'EXIT_FAILURE'.
 	 */
-	void ProtectedMinutiaeTemplate::updateField() {
+	void ProtectedMinutiaeTemplate::updateField()
+	{
 
 		// minimal size the field can have to be able to encode every minutia's
 		// quantization
@@ -3248,7 +3614,8 @@ namespace thimble {
 		int degree = 0;
 		{ // Determine the minimal degree of the binary field
 			int tmp = n;
-			while ( tmp != 0 ) {
+			while (tmp != 0)
+			{
 				++degree;
 				tmp >>= 1;
 			}
@@ -3258,20 +3625,22 @@ namespace thimble {
 		// blending features
 		degree += 1;
 
-		if ( this->gfPtr == NULL || this->gfPtr->getDegree() != degree ) {
+		if (this->gfPtr == NULL || this->gfPtr->getDegree() != degree)
+		{
 
 			// Free space used by a possibly non-NULL pointer to a finite field
 			delete this->gfPtr;
 			this->gfPtr = NULL;
 
 			// Create new binary field of the desired degree
-			this->gfPtr = new(nothrow) SmallBinaryField(degree);
+			this->gfPtr = new (nothrow) SmallBinaryField(degree);
 
 			// Check whether sufficient memory could be provided and exit otherwise
-			if ( this->gfPtr == NULL ) {
+			if (this->gfPtr == NULL)
+			{
 				cerr << "ProtectedMinutiaeTemplate::updateField: out of memory."
 					 << endl;
-                exit(EXIT_FAILURE);
+				exit(EXIT_FAILURE);
 			}
 		}
 	}
@@ -3300,16 +3669,18 @@ namespace thimble {
 	 *
 	 * @see permutation
 	 */
-	void ProtectedMinutiaeTemplate::updatePermutation() {
+	void ProtectedMinutiaeTemplate::updatePermutation()
+	{
 
 		int n = getVaultSize();
-        this->permutation.setDimension(n);
+		this->permutation.setDimension(n);
 
 		RandomGenerator gen(this->hash);
 
-		for ( int x0 = 0 ; x0 < n ; x0++ ) {
+		for (int x0 = 0; x0 < n; x0++)
+		{
 			int x1 = (int)(gen.rand() % n);
-			this->permutation.exchange(x0,x1);
+			this->permutation.exchange(x0, x1);
 		}
 	}
 
@@ -3341,9 +3712,10 @@ namespace thimble {
 	 *             finite field that can be access via
 	 *             \link getField()\endlink, an error message is printed
 	 *             to <code>stderr</code> and the program exits with
-     *             status 'EXIT_FAILURE'.
+	 *             status 'EXIT_FAILURE'.
 	 */
-	uint32_t ProtectedMinutiaeTemplate::_reorder( uint32_t a ) const {
+	uint32_t ProtectedMinutiaeTemplate::_reorder(uint32_t a) const
+	{
 		return (uint32_t)(this->permutation.eval((int)a));
 	}
 
@@ -3406,16 +3778,17 @@ namespace thimble {
 	 *             otherwise, the method runs into undocumented
 	 *             behavior.
 	 */
-	void ProtectedMinutiaeTemplate::packVaultPolynomial
-	( const SmallBinaryFieldPolynomial & V ) {
+	void ProtectedMinutiaeTemplate::packVaultPolynomial(const SmallBinaryFieldPolynomial &V)
+	{
 
 		// Random slow-down value
-		BigInteger slowDownVal; slowDownVal.random(this->slowDownFactor,true);
+		BigInteger slowDownVal;
+		slowDownVal.random(this->slowDownFactor, true);
 
 		// Derive AES key from slow-down value.
 		AES128 aes = deriveKey(slowDownVal);
 
-		int t , d , n;
+		int t, d, n;
 		t = this->t;
 		d = this->gfPtr->getDegree();
 		n = vaultDataSize();
@@ -3425,20 +3798,21 @@ namespace thimble {
 		// ***** encryption array ********************************************
 		// *******************************************************************
 
-		this->vaultPolynomialData = (uint8_t*)malloc
-				( n * sizeof(uint8_t) );
-		uint32_t *coeffs = (uint32_t*)malloc( t * sizeof(uint32_t) );
-		if ( this->vaultPolynomialData == NULL || coeffs == NULL ) {
+		this->vaultPolynomialData = (uint8_t *)malloc(n * sizeof(uint8_t));
+		uint32_t *coeffs = (uint32_t *)malloc(t * sizeof(uint32_t));
+		if (this->vaultPolynomialData == NULL || coeffs == NULL)
+		{
 			cerr << "ProtectedMinutiaeTemplate::packVaultPolynomial: "
 				 << "out of memory." << endl;
 			exit(EXIT_FAILURE);
 		}
 
-		for ( int j = 0 ; j < t ; j++ ) {
+		for (int j = 0; j < t; j++)
+		{
 			coeffs[j] = V.getCoeff(j);
 		}
 
-		concat_bit_vectors(this->vaultPolynomialData,coeffs,t,d,n);
+		concat_bit_vectors(this->vaultPolynomialData, coeffs, t, d, n);
 
 		free(coeffs);
 
@@ -3448,13 +3822,12 @@ namespace thimble {
 		// *******************************************************************
 
 		// ENCRYPTION
-		aes.encrypt
-		(this->vaultPolynomialData,this->vaultPolynomialData,n);
+		aes.encrypt(this->vaultPolynomialData, this->vaultPolynomialData, n);
 	}
 
 	/**
 	 * @brief
-     *            Determines how many bytes are needed to hold
+	 *            Determines how many bytes are needed to hold
 	 *            the data of the packed vault polynomial.
 	 *
 	 * @details
@@ -3472,18 +3845,20 @@ namespace thimble {
 	 *            that the byte array is a multiple of 16 bytes
 	 *            (i.e., 128 bits).
 	 */
-	int ProtectedMinutiaeTemplate::vaultDataSize() const {
+	int ProtectedMinutiaeTemplate::vaultDataSize() const
+	{
 
-		int t , d;
+		int t, d;
 		t = this->t;
 		d = this->gfPtr->getDegree();
 
 		int b = t * d;
 
-		int n = b / 8 + (b%8?1:0);
+		int n = b / 8 + (b % 8 ? 1 : 0);
 
-		if ( n % 16 != 0 ) {
-			n += 16-n%16;
+		if (n % 16 != 0)
+		{
+			n += 16 - n % 16;
 		}
 
 		return n;
@@ -3513,18 +3888,20 @@ namespace thimble {
 	 *             is printed <code>stderr</code> and the program exits
 	 *             with status 'EXIT_FAILURE'
 	 */
-	AES128 ProtectedMinutiaeTemplate::deriveKey( const BigInteger & x ) {
+	AES128 ProtectedMinutiaeTemplate::deriveKey(const BigInteger &x)
+	{
 
-		uint8_t *array = (uint8_t*)malloc( x.getSizeInBytes() );
-		if ( array == NULL ) {
+		uint8_t *array = (uint8_t *)malloc(x.getSizeInBytes());
+		if (array == NULL)
+		{
 			cerr << "createAESKey: out of memory."
-				  << endl;
+				 << endl;
 			exit(EXIT_FAILURE);
 		}
 
 		x.toBytes(array);
 		uint8_t hash[20];
-		SHA().hash(hash,array,x.getSizeInBytes());
+		SHA().hash(hash, array, x.getSizeInBytes());
 
 		AES128 aes(hash);
 
@@ -3567,27 +3944,30 @@ namespace thimble {
 	 *           <i>8*n-t*d</i> bits in <code>bits</code> are selected
 	 *           randomly.
 	 */
-	void ProtectedMinutiaeTemplate::concat_bit_vectors
-	( uint8_t *bits , const uint32_t *vecs , int t , int d , int n ) {
+	void ProtectedMinutiaeTemplate::concat_bit_vectors(uint8_t *bits, const uint32_t *vecs, int t, int d, int n)
+	{
 
-		int idx = 0; //Index of the active output byte starting from 0
+		int idx = 0;   // Index of the active output byte starting from 0
 		int count = 0; // Count of the number of bits
 
 		// Set the output bytes initially to '0'.
-		memset(bits,0,n);
+		memset(bits, 0, n);
 
 		// Iteration over the array of 32-bit vector
-		for( int i = 0 ; i < t ; i++ ) {
+		for (int i = 0; i < t; i++)
+		{
 
 			// Iterate through the first 'd' bits of each vector starting
 			// from the most significant down to the least significant.
-			for ( int j = d-1 ; j >= 0 ; j-- ) {
+			for (int j = d - 1; j >= 0; j--)
+			{
 
 				// Multiply the active byte by 2 ...
 				bits[idx] <<= 1;
 
 				// ... and if the currently considered bit is set ...
-				if ( vecs[i] & (1<<j) ) {
+				if (vecs[i] & (1 << j))
+				{
 					// ... increment.
 					bits[idx] += 1;
 				}
@@ -3595,7 +3975,8 @@ namespace thimble {
 				// Check by bit count whether the index of the active
 				// output byte to be changed.
 				++count;
-				if ( count % 8 == 0 ) {
+				if (count % 8 == 0)
+				{
 					++idx;
 				}
 			}
@@ -3603,16 +3984,19 @@ namespace thimble {
 
 		// Supplement the least significant bits of the active
 		// output byte by random bits.
-		for ( ; count % 8 != 0 ; count++ ) {
+		for (; count % 8 != 0; count++)
+		{
 			bits[idx] <<= 1;
-			if ( (MathTools::rand8(true) & 0x1) != 0 ) {
+			if ((MathTools::rand8(true) & 0x1) != 0)
+			{
 				bits[idx] += 1;
 			}
 		}
 
 		// Supplement the remaining bytes by random bytes
 		++idx;
-		for ( ; idx < n ; idx++ ) {
+		for (; idx < n; idx++)
+		{
 			bits[idx] = MathTools::rand8(true);
 		}
 	}
@@ -3644,32 +4028,36 @@ namespace thimble {
 	 *            the length of the bit strings encoded in the sequence
 	 *            <code>bits</code>.
 	 */
-	void ProtectedMinutiaeTemplate::split_into_bit_vectors
-	( uint32_t *vecs , const uint8_t *bits , int t , int d  ) {
+	void ProtectedMinutiaeTemplate::split_into_bit_vectors(uint32_t *vecs, const uint8_t *bits, int t, int d)
+	{
 
-		int idx = 0; //Active byte index
-		int l = 7; // Active bit index
+		int idx = 0; // Active byte index
+		int l = 7;	 // Active bit index
 
 		// Iteration over the 'd'-bit bitstrings.
-		for ( int i = 0 ; i < t ; i++ ) {
+		for (int i = 0; i < t; i++)
+		{
 
 			// Initialize bitstring with '0'.
 			vecs[i] = 0;
 
 			// Iterate over the bitstring's position
-			for ( int j = d-1 ; j >= 0 ; j-- ) {
+			for (int j = d - 1; j >= 0; j--)
+			{
 
 				// Multiply active bitstring by 2 ...
 				vecs[i] <<= 1;
 				// ... and if the active bit index is set, ...
-				if ( bits[idx] & (1<<l) ) {
+				if (bits[idx] & (1 << l))
+				{
 					// ... increment.
 					vecs[i] += 1;
 				}
 
 				// Check whether active byte index to be changed.
 				--l;
-				if ( l < 0 ) {
+				if (l < 0)
+				{
 					++idx;
 					l = 7;
 				}

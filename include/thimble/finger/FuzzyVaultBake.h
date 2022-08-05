@@ -79,9 +79,9 @@ public:
      * @return false if some errors occured
      */
     bool decode(SmallBinaryFieldPolynomial &f, const uint32_t *x, const uint32_t *y,
-                int t, int k, const uint8_t hash[20], int D) const;
+                int t, int k, const uint8_t hash[20], int D) const override;
 
-    bool open(SmallBinaryFieldPolynomial &f, const MinutiaeView &view) const;
+    bool open(SmallBinaryFieldPolynomial &f, const MinutiaeView &view) const override;
 };
 
 #endif

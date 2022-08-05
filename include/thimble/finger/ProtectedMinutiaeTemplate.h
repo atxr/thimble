@@ -927,7 +927,7 @@ namespace thimble {
 		 *             message is printed to <code>stderr</code> and the
 		 *             program exits with status 'EXIT_FAILURE'.
 		 */
-		bool open( SmallBinaryFieldPolynomial & f , const MinutiaeView & view ) const;
+		virtual bool open( SmallBinaryFieldPolynomial & f , const MinutiaeView & view ) const;
 
 		/**
 		 * @brief
@@ -1031,7 +1031,7 @@ namespace thimble {
 		 *             <code>true</code> if the decoding attempt was successful;
 		 *             otherwise, the function returns <code>false</code>.
 		 */
-		bool decode
+		virtual bool decode
 		( SmallBinaryFieldPolynomial & f , const uint32_t *x , const uint32_t *y ,
 		  int t , int k , const uint8_t hash[20] , int D ) const;
 
