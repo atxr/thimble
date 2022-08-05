@@ -30,6 +30,16 @@ struct BytesVault
 class FuzzyVaultBake : public ProtectedMinutiaeTemplate
 {
     /**
+     * @brief Construct a new Fuzzy Vault Bake object
+     * Call the TemplateProtectedMinutiae constructor
+     *
+     * @param width
+     * @param height
+     * @param dpi
+     */
+    FuzzyVaultBake(int width, int height, int dpi);
+
+    /**
      * @brief Construct a new Fuzzy Vault Bake object with a byte representation
      *
      * @param bv: a byte representation of a fuzzy vault
