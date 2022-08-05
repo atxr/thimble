@@ -52,7 +52,7 @@ public:
      *
      * @return BytesVault
      */
-    BytesVault toBytes();
+    BytesVault toBytesVault();
 
     /**
      * @brief Open the vault, and if it is a success, compute f(0) where f is the secret polynomial
