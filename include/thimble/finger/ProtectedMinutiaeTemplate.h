@@ -2045,7 +2045,7 @@ namespace thimble {
 		static int overlap
 		( const uint32_t *array1 , int t1 , const uint32_t *array2 , int t2 );
 
-	private:
+	protected:
 
 		/**
 		 * @brief
