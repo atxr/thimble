@@ -54,17 +54,18 @@
 /**
  * @brief The library's namespace.
  */
-namespace thimble {
+namespace thimble
+{
 
 	/**
 	 * @brief
 	 *           Provides tools related with the fuzzy vault scheme which is
 	 *           to protect biometrics and other noisy data.
 	 */
-	class THIMBLE_DLL FuzzyVaultTools {
+	class THIMBLE_DLL FuzzyVaultTools
+	{
 
 	public:
-
 		/**
 		 * @brief
 		 *            Creates a random instance of a fuzzy vault with
@@ -151,59 +152,57 @@ namespace thimble {
 		 *            the function may run into undocumented behavior.
 		 *
 		 */
-		static SmallBinaryFieldPolynomial createRandomInstance
-		( uint32_t *x , uint32_t *y , int n , int t , int k ,
-		  const SmallBinaryField & gf , bool tryRandom = true );
+		static SmallBinaryFieldPolynomial createRandomInstance(uint32_t *x, uint32_t *y, int n, int t, int k,
+															   const SmallBinaryField &gf, bool tryRandom = true);
 
-        /**
-         * @brief
-         *            Creates a random instance of the improved fuzzy vault scheme.
-         *
-         * @details
-         *            The function generates a random polynomial <i>f</i> of degree
-         *            smaller <i>k</i>; furthermore, a product
-         *            \f[
-         *             \prod_{j=0}^{t-1}(X-x_j)
-         *            \f]
-         *            where the \f$x_j\f$ are selected to be random and distinct.
-         *            Then the function outputs
-         *            \f[
-         *             V(X)=f(X)+\prod_{j=0}^{t-1}(X-x_j).
-         *            \f]
-         *            The function also returns <i>f</i> to enable evaluations of
-         *            attacks in order to decide whether they were successful or
-         *            not.
-         *
-         * @param V
-         *            The random vault polynomial.
-         *
-         * @param t
-         *            The number of random genuine features \f$x_j\f$ protected by
-         *            the vault.
-         *
-         * @param k
-         *            The length of the vault's secret polynomial.
-         *
-         * @param tryRandom
-         *            If <code>true</code>, the function is advised to use a
-         *            cryptographic number generator; otherwise, the method
-         *            wraps around the standard <code>rand()</code> function.
-         *
-         * @warning
-         *            If the relation \f$0\leq k<t\leq n\f$, where \f$n\f$ is
-         *            the cardinality of the field over which \f$V\f$ is
-         *            defined, the function prints an error message to
-         *            <code>stderr</code> and exits with status
-         *            'EXIT_FAILURE'.
-         *
-         * @warning
-         *            If not enough memory could be provided, an error
-         *            message is printed to <code>stderr</code> and the
-         *            program exits with status 'EXIT_FAILURE'.
-         */
-        static SmallBinaryFieldPolynomial createRandomInstance
-        ( SmallBinaryFieldPolynomial & V , int t , int k ,
-          bool tryRandom = true );
+		/**
+		 * @brief
+		 *            Creates a random instance of the improved fuzzy vault scheme.
+		 *
+		 * @details
+		 *            The function generates a random polynomial <i>f</i> of degree
+		 *            smaller <i>k</i>; furthermore, a product
+		 *            \f[
+		 *             \prod_{j=0}^{t-1}(X-x_j)
+		 *            \f]
+		 *            where the \f$x_j\f$ are selected to be random and distinct.
+		 *            Then the function outputs
+		 *            \f[
+		 *             V(X)=f(X)+\prod_{j=0}^{t-1}(X-x_j).
+		 *            \f]
+		 *            The function also returns <i>f</i> to enable evaluations of
+		 *            attacks in order to decide whether they were successful or
+		 *            not.
+		 *
+		 * @param V
+		 *            The random vault polynomial.
+		 *
+		 * @param t
+		 *            The number of random genuine features \f$x_j\f$ protected by
+		 *            the vault.
+		 *
+		 * @param k
+		 *            The length of the vault's secret polynomial.
+		 *
+		 * @param tryRandom
+		 *            If <code>true</code>, the function is advised to use a
+		 *            cryptographic number generator; otherwise, the method
+		 *            wraps around the standard <code>rand()</code> function.
+		 *
+		 * @warning
+		 *            If the relation \f$0\leq k<t\leq n\f$, where \f$n\f$ is
+		 *            the cardinality of the field over which \f$V\f$ is
+		 *            defined, the function prints an error message to
+		 *            <code>stderr</code> and exits with status
+		 *            'EXIT_FAILURE'.
+		 *
+		 * @warning
+		 *            If not enough memory could be provided, an error
+		 *            message is printed to <code>stderr</code> and the
+		 *            program exits with status 'EXIT_FAILURE'.
+		 */
+		static SmallBinaryFieldPolynomial createRandomInstance(SmallBinaryFieldPolynomial &V, int t, int k,
+															   bool tryRandom = true);
 
 		/**
 		 * @brief
@@ -286,11 +285,10 @@ namespace thimble {
 		 *             </li>
 		 *            </ul>
 		 */
-		static bool bfattack
-		( SmallBinaryFieldPolynomial & f ,
-		  const uint32_t *x , const uint32_t *y ,
-		  int n , int k , const uint32_t hash[5] ,
-		  uint64_t maxIts );
+		static bool bfattack(SmallBinaryFieldPolynomial &f,
+							 const uint32_t *x, const uint32_t *y,
+							 int n, int k, const uint32_t hash[5],
+							 uint64_t maxIts);
 
 		/**
 		 * @brief
@@ -373,11 +371,10 @@ namespace thimble {
 		 *             </li>
 		 *            </ul>
 		 */
-		static bool bfattack
-		( SmallBinaryFieldPolynomial & f ,
-		  const uint32_t *x , const uint32_t *y ,
-		  int n , int k , const uint8_t hash[20] ,
-		  uint64_t maxIts );
+		static bool bfattack(SmallBinaryFieldPolynomial &f,
+							 const uint32_t *x, const uint32_t *y,
+							 int n, int k, const uint8_t hash[20],
+							 uint64_t maxIts);
 
 		/**
 		 * @brief
@@ -442,10 +439,9 @@ namespace thimble {
 		 *           function the function prints an error message to
 		 *           <code>stderr</code> and exits with status 'EXIT_FAILURE'.
 		 */
-		static bool bfdecode
-		( SmallBinaryFieldPolynomial & f ,
-		  const uint32_t *x , const uint32_t *y ,
-		  int n , int k , const uint32_t hash[5] );
+		static bool bfdecode(SmallBinaryFieldPolynomial &f,
+							 const uint32_t *x, const uint32_t *y,
+							 int n, int k, const uint32_t hash[5]);
 
 		/**
 		 * @brief
@@ -476,9 +472,39 @@ namespace thimble {
 		 *           The difficulty in choosing <i>k</i> genuine points
 		 *           from the vault points.
 		 */
-		static long double bfsecurity( int n , int t , int k );
+		static long double bfsecurity(int n, int t, int k);
+
+		/**
+		 * @brief
+		 *           Chooses <code>k</code> pairwise different integers from the
+		 *           range <code>0,...,n-1</code> at random.
+		 *
+		 * @param indices
+		 *           Will contain <code>k</code> pairwise distinct integers
+		 *           in the range <code>0,...,n-1</code>.
+		 *
+		 * @param n
+		 *           Specifies the range from where to selected integer.
+		 *
+		 * @param k
+		 *           Specifies the number of integers to be selected.
+		 *
+		 * @warning
+		 *            If <code>k</code> is greater than or equals <code>n</code>
+		 *            the method may never terminate.
+		 *
+		 * @warning
+		 *            If <code>indices</code> cannot store at least <code>k</code>
+		 *            integers, the method may run into unexpected, undocumented
+		 *            behavior.
+		 *
+		 * @warning
+		 *            If not sufficient memory could be provided, the method
+		 *            prints an error message to <code>stderr</code> and exits
+		 *            with status 'EXIT_FAILURE'.
+		 */
+		static void fastChooseIndicesAtRandom(register int *indices, register int n, register int k);
 	};
 }
-
 
 #endif /* THIMBLE_FUZZYVAULTTOOLS_H_ */

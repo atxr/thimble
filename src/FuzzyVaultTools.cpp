@@ -48,7 +48,8 @@ using namespace std;
 /**
  * @brief The library's namespace
  */
-namespace thimble {
+namespace thimble
+{
 
 	/**
 	 * @brief
@@ -96,32 +97,35 @@ namespace thimble {
 	 *            prints an error message to <code>stderr</code> and exits
 	 *            with status 'EXIT_FAILURE'.
 	 */
-	static void chooseFiniteFieldSetAtRandom
-	( uint32_t *x , int n , const SmallBinaryField & gf , bool tryRandom ) {
+	static void chooseFiniteFieldSetAtRandom(uint32_t *x, int n, const SmallBinaryField &gf, bool tryRandom)
+	{
 
 		uint32_t size = gf.getCardinality();
-		uint32_t *elements = (uint32_t*)malloc( size*sizeof(uint32_t));
-		if ( elements == NULL ) {
+		uint32_t *elements = (uint32_t *)malloc(size * sizeof(uint32_t));
+		if (elements == NULL)
+		{
 			cerr << "FuzzyVaultTools: Out of memory." << endl;
 			exit(EXIT_FAILURE);
 		}
 
-		for ( uint32_t i = 0 ; i < size ; i++ ) {
+		for (uint32_t i = 0; i < size; i++)
+		{
 			elements[i] = i;
 		}
 
-		for ( int i = 0 ; i < n ; i++ ) {
+		for (int i = 0; i < n; i++)
+		{
 
-			uint32_t j = MathTools::rand32(tryRandom) % (uint32_t)(size-i);
+			uint32_t j = MathTools::rand32(tryRandom) % (uint32_t)(size - i);
 
 			x[i] = elements[j];
-			for ( ; j+1 < size ; j++ ) {
-				elements[j] = elements[j+1];
+			for (; j + 1 < size; j++)
+			{
+				elements[j] = elements[j + 1];
 			}
 		}
 
 		free(elements);
-
 	}
 
 	/**
@@ -158,8 +162,8 @@ namespace thimble {
 	 *            prints an error message to <code>stderr</code> and exits
 	 *            with status 'EXIT_FAILURE'.
 	 */
-	static void chooseIndicesAtRandom
-	( register int *indices , register int n , register int k , bool tryRandom ) {
+	static void chooseIndicesAtRandom(register int *indices, register int n, register int k, bool tryRandom)
+	{
 
 		register int i;
 		register int j;
@@ -221,26 +225,30 @@ namespace thimble {
 	 *            integers, the method may run into unexpected, undocumented
 	 *            behavior.
 	 */
-	static void chooseIndicesAtRandom
-	( register int *indices , register int n , register int k ) {
+	void FuzzyVaultTools::fastChooseIndicesAtRandom(register int *indices, register int n, register int k)
+	{
 
 		register bool alreadyChosen;
 		register int index;
 		register int i;
 		register int j;
 
-		for ( i = 0 ; i < k ; i++ ) {
+		for (i = 0; i < k; i++)
+		{
 
-			do {
+			do
+			{
 				index = rand() % n;
 				alreadyChosen = false;
-				for ( j = 0 ; j < i ; j++ ) {
-					if ( indices[j] == index ) {
+				for (j = 0; j < i; j++)
+				{
+					if (indices[j] == index)
+					{
 						alreadyChosen = true;
 						break;
 					}
 				}
-			} while ( alreadyChosen );
+			} while (alreadyChosen);
 
 			indices[i] = index;
 		}
@@ -254,11 +262,12 @@ namespace thimble {
 	 * @details
 	 *            see 'FuzzyVaultTools.h'
 	 */
-	SmallBinaryFieldPolynomial FuzzyVaultTools::createRandomInstance
-	( uint32_t *x , uint32_t *y , int n , int t , int k ,
-	  const SmallBinaryField & gf , bool tryRandom ) {
+	SmallBinaryFieldPolynomial FuzzyVaultTools::createRandomInstance(uint32_t *x, uint32_t *y, int n, int t, int k,
+																	 const SmallBinaryField &gf, bool tryRandom)
+	{
 
-		if ( (uint64_t)n > gf.getCardinality() ) {
+		if ((uint64_t)n > gf.getCardinality())
+		{
 			cerr << "FuzzyVault::createRandomInstance: "
 				 << "It is not possible to create a random vault of size "
 				 << "larger than the finite field's cardinality." << endl;
@@ -268,36 +277,39 @@ namespace thimble {
 		// Allocate memory for choosing the genuine points
 		// and check if this was successful
 		int *genuineIndices;
-		genuineIndices = (int*)malloc(t*sizeof(int));
+		genuineIndices = (int *)malloc(t * sizeof(int));
 
 		// List in 'x' the elements of a randomly
 		// chosen subset of the field that is of size
-        // 'n', i.e. a list without multiples.
-		chooseFiniteFieldSetAtRandom(x,n,gf,tryRandom);
+		// 'n', i.e. a list without multiples.
+		chooseFiniteFieldSetAtRandom(x, n, gf, tryRandom);
 
 		// Generate the random vault polynomial
 		SmallBinaryFieldPolynomial f(gf);
-		f.random(k,tryRandom);
+		f.random(k, tryRandom);
 
 		// Generate the ordinate such that, for now, all
 		// of the resulting vault points do not lie
 		// on the polynomial's graph
-		for ( int i = 0 ; i < n ; i++ ) {
+		for (int i = 0; i < n; i++)
+		{
 
 			uint32_t z = f.eval(x[i]);
-			do {
+			do
+			{
 				y[i] = gf.random(tryRandom);
-			} while ( z == y[i] );
+			} while (z == y[i]);
 		}
 
 		// Now, select those indices of the vault points
 		// that will be genuine points
-		chooseIndicesAtRandom(genuineIndices,n,t,tryRandom);
+		chooseIndicesAtRandom(genuineIndices, n, t, tryRandom);
 
 		// Update the genuine vault point's ordinate values
 		// by letting the the evaluation of the polynomial
 		// at the corresponding x-value
-		for ( int i = 0 ; i < t ; i++ ) {
+		for (int i = 0; i < t; i++)
+		{
 			int j = genuineIndices[i];
 			y[j] = f.eval(x[j]);
 		}
@@ -309,91 +321,94 @@ namespace thimble {
 		return f;
 	}
 
-    /**
-     * @brief
-     *            Creates a random instance of the improved fuzzy vault scheme.
-     *
-     * @details
-     *            The function generates a random polynomial <i>f</i> of degree
-     *            smaller <i>k</i>; furthermore, a product
-     *            \f[
-     *             \prod_{j=0}^{t-1}(X-x_j)
-     *            \f]
-     *            where the \f$x_j\f$ are selected to be random and distinct.
-     *            Then the function outputs
-     *            \f[
-     *             V(X)=f(X)+\prod_{j=0}^{t-1}(X-x_j).
-     *            \f]
-     *            The function also returns <i>f</i> to enable evaluations of
-     *            attacks in order to decide whether they were successful or
-     *            not.
-     *
-     * @param V
-     *            The random vault polynomial.
-     *
-     * @param t
-     *            The number of random genuine features \f$x_j\f$ protected by
-     *            the vault.
-     *
-     * @param k
-     *            The length of the vault's secret polynomial.
-     *
-     * @param tryRandom
-     *            If <code>true</code>, the function is advised to use a
-     *            cryptographic number generator; otherwise, the method
-     *            wraps around the standard <code>rand()</code> function.
-     *
-     * @warning
-     *            If the relation \f$0\leq k<t\leq n\f$, where \f$n\f$ is
-     *            the cardinality of the field over which \f$V\f$ is
-     *            defined, the function prints an error message to
-     *            <code>stderr</code> and exits with status
-     *            'EXIT_FAILURE'.
-     *
-     * @warning
-     *            If not enough memory could be provided, an error
-     *            message is printed to <code>stderr</code> and the
-     *            program exits with status 'EXIT_FAILURE'.
-     */
-    SmallBinaryFieldPolynomial FuzzyVaultTools::createRandomInstance
-    ( SmallBinaryFieldPolynomial & V , int t , int k , bool tryRandom ) {
+	/**
+	 * @brief
+	 *            Creates a random instance of the improved fuzzy vault scheme.
+	 *
+	 * @details
+	 *            The function generates a random polynomial <i>f</i> of degree
+	 *            smaller <i>k</i>; furthermore, a product
+	 *            \f[
+	 *             \prod_{j=0}^{t-1}(X-x_j)
+	 *            \f]
+	 *            where the \f$x_j\f$ are selected to be random and distinct.
+	 *            Then the function outputs
+	 *            \f[
+	 *             V(X)=f(X)+\prod_{j=0}^{t-1}(X-x_j).
+	 *            \f]
+	 *            The function also returns <i>f</i> to enable evaluations of
+	 *            attacks in order to decide whether they were successful or
+	 *            not.
+	 *
+	 * @param V
+	 *            The random vault polynomial.
+	 *
+	 * @param t
+	 *            The number of random genuine features \f$x_j\f$ protected by
+	 *            the vault.
+	 *
+	 * @param k
+	 *            The length of the vault's secret polynomial.
+	 *
+	 * @param tryRandom
+	 *            If <code>true</code>, the function is advised to use a
+	 *            cryptographic number generator; otherwise, the method
+	 *            wraps around the standard <code>rand()</code> function.
+	 *
+	 * @warning
+	 *            If the relation \f$0\leq k<t\leq n\f$, where \f$n\f$ is
+	 *            the cardinality of the field over which \f$V\f$ is
+	 *            defined, the function prints an error message to
+	 *            <code>stderr</code> and exits with status
+	 *            'EXIT_FAILURE'.
+	 *
+	 * @warning
+	 *            If not enough memory could be provided, an error
+	 *            message is printed to <code>stderr</code> and the
+	 *            program exits with status 'EXIT_FAILURE'.
+	 */
+	SmallBinaryFieldPolynomial FuzzyVaultTools::createRandomInstance(SmallBinaryFieldPolynomial &V, int t, int k, bool tryRandom)
+	{
 
-        if ( k < 0 || t < 0 ) {
-            cerr << "FuzzyVaultTools::createRandomInstance: "
-                 << "number of genuine features and length of secret "
-                 << "polynomial must be positive." << endl;
-            exit(EXIT_FAILURE);
-        }
+		if (k < 0 || t < 0)
+		{
+			cerr << "FuzzyVaultTools::createRandomInstance: "
+				 << "number of genuine features and length of secret "
+				 << "polynomial must be positive." << endl;
+			exit(EXIT_FAILURE);
+		}
 
-        if ( k >= t ) {
-            cerr << "FuzzyVaultTools::createRandomInstance: "
-                 << "length of secret polynomial must be smaller than "
-                 << "number of genuine features." << endl;
-            exit(EXIT_FAILURE);
-        }
+		if (k >= t)
+		{
+			cerr << "FuzzyVaultTools::createRandomInstance: "
+				 << "length of secret polynomial must be smaller than "
+				 << "number of genuine features." << endl;
+			exit(EXIT_FAILURE);
+		}
 
-        if ( (uint64_t)t > (uint64_t)V.getField().getCardinality() ) {
+		if ((uint64_t)t > (uint64_t)V.getField().getCardinality())
+		{
 
-            cerr << "FuzzyVaultTools::createRandomInstance: "
-                 << "number of genuine features too large." << endl;
-            exit(EXIT_FAILURE);
-        }
+			cerr << "FuzzyVaultTools::createRandomInstance: "
+				 << "number of genuine features too large." << endl;
+			exit(EXIT_FAILURE);
+		}
 
-        // Generate the secret polynomial
-        SmallBinaryFieldPolynomial f(V.getField());
-        f.random(k,tryRandom);
-        // Generate a random subset '{x[j]}' of the field of size 't'
-        uint32_t *x = (uint32_t*)malloc( t * sizeof(uint32_t) );
-        chooseFiniteFieldSetAtRandom(x,t,V.getField(),tryRandom);
-        // Computes the product 'V(X)=(X-x[0])*...*(X-x[t-1])'
-        V.buildFromRoots(x,t);
-        // Output vault polynomial
-        add(V,V,f);
+		// Generate the secret polynomial
+		SmallBinaryFieldPolynomial f(V.getField());
+		f.random(k, tryRandom);
+		// Generate a random subset '{x[j]}' of the field of size 't'
+		uint32_t *x = (uint32_t *)malloc(t * sizeof(uint32_t));
+		chooseFiniteFieldSetAtRandom(x, t, V.getField(), tryRandom);
+		// Computes the product 'V(X)=(X-x[0])*...*(X-x[t-1])'
+		V.buildFromRoots(x, t);
+		// Output vault polynomial
+		add(V, V, f);
 
-        free(x);
+		free(x);
 
-        return f;
-    }
+		return f;
+	}
 
 	/**
 	 * @brief
@@ -402,17 +417,18 @@ namespace thimble {
 	 * @details
 	 *            see 'FuzzyVaultTools.h'
 	 */
-	bool FuzzyVaultTools::bfattack
-	( SmallBinaryFieldPolynomial & f ,
-	  const uint32_t *x , const uint32_t *y ,
-	  int n , int k , const uint32_t hash[5] ,
-	  uint64_t maxIts ) {
+	bool FuzzyVaultTools::bfattack(SmallBinaryFieldPolynomial &f,
+								   const uint32_t *x, const uint32_t *y,
+								   int n, int k, const uint32_t hash[5],
+								   uint64_t maxIts)
+	{
 
-        SHA sha;
+		SHA sha;
 
 		// Check whether we can choose random points from 'n'
 		// points using 'rand()'
-		if ( n > RAND_MAX ) {
+		if (n > RAND_MAX)
+		{
 			cerr << "FuzzyVault::bfattack: The number of vault points must be"
 				 << " smaller than or equal RAND_MAX which is"
 				 << RAND_MAX << "." << endl;
@@ -420,7 +436,8 @@ namespace thimble {
 		}
 
 		// Check whether the vault is of reasonable parameters
-		if ( n <= 0 || k <= 0 || k > n ) {
+		if (n <= 0 || k <= 0 || k > n)
+		{
 			cerr << "FuzzyVault::bfattack: The number of vault points must be"
 				 << " greater than zero. Furthermore, the size of the secret "
 				 << "polynomial must be greater than zero and smaller than "
@@ -438,28 +455,31 @@ namespace thimble {
 		// Initalize space for the hash of the candidate polynomial
 		uint32_t candidateHash[5];
 
-		uint32_t *a , *b;
+		uint32_t *a, *b;
 		int *indices;
 
 		// Allocate memory to select 'k' random vault
 		// points
-		a = (uint32_t*)malloc( k * sizeof(uint32_t) );
-		b = (uint32_t*)malloc( k * sizeof(uint32_t) );
-		indices = (int*)malloc( k * sizeof(uint32_t) );
-		if ( a == NULL || b == NULL || indices == NULL ) {
+		a = (uint32_t *)malloc(k * sizeof(uint32_t));
+		b = (uint32_t *)malloc(k * sizeof(uint32_t));
+		indices = (int *)malloc(k * sizeof(uint32_t));
+		if (a == NULL || b == NULL || indices == NULL)
+		{
 			cerr << "FuzzyVault::bfattack: Out of memory." << endl;
 			exit(EXIT_FAILURE);
 		}
 
 		// Iterate at most 'maxIts' times
-		for ( uint64_t it = 0 ; it < maxIts ; it++ ) {
+		for (uint64_t it = 0; it < maxIts; it++)
+		{
 
 			// Select pairwise different indices in the range
 			// '0,...,n-1' and ...
-			chooseIndicesAtRandom(indices,n,k);
+			fastChooseIndicesAtRandom(indices, n, k);
 
 			// ... set the selected vault points, correspondingly.
-			for ( int i = 0 ; i < k ; i++ ) {
+			for (int i = 0; i < k; i++)
+			{
 				int j = indices[i];
 				a[i] = x[j];
 				b[i] = y[j];
@@ -467,15 +487,15 @@ namespace thimble {
 
 			// Determine the interpolation polynomial of the selected
 			// vault points and ...
-			candidatePolynomial.interpolate(a,b,k);
+			candidatePolynomial.interpolate(a, b, k);
 			// ... compute its SHA-1 hash value
-            sha.hash
-            (candidateHash,
-             candidatePolynomial.getData(),candidatePolynomial.deg()+1);
+			sha.hash(candidateHash,
+					 candidatePolynomial.getData(), candidatePolynomial.deg() + 1);
 
 			// Check whether the candidate polynomial's hash value
 			// agrees with the hash value of the secret polynomial.
-			if ( memcmp(candidateHash,hash,20) == 0 ) {
+			if (memcmp(candidateHash, hash, 20) == 0)
+			{
 				// If true, assign 'f', update the 'state' and abort
 				// the loop.
 				f.assign(candidatePolynomial);
@@ -493,101 +513,106 @@ namespace thimble {
 	}
 
 	/**
-		 * @brief
-		 *            Attempts to break an instance of the fuzzy vault scheme.
-		 *
-		 * @details
-		 *            see 'FuzzyVaultTools.h'
-		 */
-		bool FuzzyVaultTools::bfattack
-		( SmallBinaryFieldPolynomial & f ,
-		  const uint32_t *x , const uint32_t *y ,
-		  int n , int k , const uint8_t hash[20] ,
-		  uint64_t maxIts ) {
+	 * @brief
+	 *            Attempts to break an instance of the fuzzy vault scheme.
+	 *
+	 * @details
+	 *            see 'FuzzyVaultTools.h'
+	 */
+	bool FuzzyVaultTools::bfattack(SmallBinaryFieldPolynomial &f,
+								   const uint32_t *x, const uint32_t *y,
+								   int n, int k, const uint8_t hash[20],
+								   uint64_t maxIts)
+	{
 
-            SHA sha;
+		SHA sha;
 
-			// Check whether we can choose random points from 'n'
-			// points using 'rand()'
-			if ( n > RAND_MAX ) {
-				cerr << "FuzzyVault::bfattack: The number of vault points must be"
-					 << " smaller than or equal RAND_MAX which is"
-					 << RAND_MAX << "." << endl;
-				exit(EXIT_FAILURE);
-			}
-
-			// Check whether the vault is of reasonable parameters
-			if ( n <= 0 || k <= 0 || k > n ) {
-				cerr << "FuzzyVault::bfattack: The number of vault points must be"
-					 << " greater than zero. Furthermore, the size of the secret "
-					 << "polynomial must be greater than zero and smaller than "
-					 << "(or equal) to the vault's size" << endl;
-				exit(EXIT_FAILURE);
-			}
-
-			// Keeps track whether a polynomial was yet found or not
-			bool state = false;
-
-			// Initialize space for the candidate polynomial
-			SmallBinaryFieldPolynomial candidatePolynomial(f.getField());
-			candidatePolynomial.ensureCapacity(k);
-
-			// Initalize space for the hash of the candidate polynomial
-			uint8_t candidateHash[20];
-
-			uint32_t *a , *b;
-			int *indices;
-
-			// Allocate memory to select 'k' random vault
-			// points
-			a = (uint32_t*)malloc( k * sizeof(uint32_t) );
-			b = (uint32_t*)malloc( k * sizeof(uint32_t) );
-			indices = (int*)malloc( k * sizeof(uint32_t) );
-			if ( a == NULL || b == NULL || indices == NULL ) {
-				cerr << "FuzzyVault::bfattack: Out of memory." << endl;
-				exit(EXIT_FAILURE);
-			}
-
-			// Iterate at most 'maxIts' times
-			for ( uint64_t it = 0 ; it < maxIts ; it++ ) {
-
-				// Select pairwise different indices in the range
-				// '0,...,n-1' and ...
-				chooseIndicesAtRandom(indices,n,k);
-
-				// ... set the selected vault points, correspondingly.
-				for ( int i = 0 ; i < k ; i++ ) {
-					int j = indices[i];
-					a[i] = x[j];
-					b[i] = y[j];
-				}
-
-				// Determine the interpolation polynomial of the selected
-				// vault points and ...
-				candidatePolynomial.interpolate(a,b,k);
-				// ... compute its SHA-1 hash value
-                sha.hash
-                (candidateHash,
-                 candidatePolynomial.getData(),candidatePolynomial.deg()+1);
-
-				// Check whether the candidate polynomial's hash value
-				// agrees with the hash value of the secret polynomial.
-				if ( memcmp(candidateHash,hash,20) == 0 ) {
-					// If true, assign 'f', update the 'state' and abort
-					// the loop.
-					f.assign(candidatePolynomial);
-					state = true;
-					break;
-				}
-			}
-
-			// Free memory
-			free(a);
-			free(b);
-			free(indices);
-
-			return state;
+		// Check whether we can choose random points from 'n'
+		// points using 'rand()'
+		if (n > RAND_MAX)
+		{
+			cerr << "FuzzyVault::bfattack: The number of vault points must be"
+				 << " smaller than or equal RAND_MAX which is"
+				 << RAND_MAX << "." << endl;
+			exit(EXIT_FAILURE);
 		}
+
+		// Check whether the vault is of reasonable parameters
+		if (n <= 0 || k <= 0 || k > n)
+		{
+			cerr << "FuzzyVault::bfattack: The number of vault points must be"
+				 << " greater than zero. Furthermore, the size of the secret "
+				 << "polynomial must be greater than zero and smaller than "
+				 << "(or equal) to the vault's size" << endl;
+			exit(EXIT_FAILURE);
+		}
+
+		// Keeps track whether a polynomial was yet found or not
+		bool state = false;
+
+		// Initialize space for the candidate polynomial
+		SmallBinaryFieldPolynomial candidatePolynomial(f.getField());
+		candidatePolynomial.ensureCapacity(k);
+
+		// Initalize space for the hash of the candidate polynomial
+		uint8_t candidateHash[20];
+
+		uint32_t *a, *b;
+		int *indices;
+
+		// Allocate memory to select 'k' random vault
+		// points
+		a = (uint32_t *)malloc(k * sizeof(uint32_t));
+		b = (uint32_t *)malloc(k * sizeof(uint32_t));
+		indices = (int *)malloc(k * sizeof(uint32_t));
+		if (a == NULL || b == NULL || indices == NULL)
+		{
+			cerr << "FuzzyVault::bfattack: Out of memory." << endl;
+			exit(EXIT_FAILURE);
+		}
+
+		// Iterate at most 'maxIts' times
+		for (uint64_t it = 0; it < maxIts; it++)
+		{
+
+			// Select pairwise different indices in the range
+			// '0,...,n-1' and ...
+			fastChooseIndicesAtRandom(indices, n, k);
+
+			// ... set the selected vault points, correspondingly.
+			for (int i = 0; i < k; i++)
+			{
+				int j = indices[i];
+				a[i] = x[j];
+				b[i] = y[j];
+			}
+
+			// Determine the interpolation polynomial of the selected
+			// vault points and ...
+			candidatePolynomial.interpolate(a, b, k);
+			// ... compute its SHA-1 hash value
+			sha.hash(candidateHash,
+					 candidatePolynomial.getData(), candidatePolynomial.deg() + 1);
+
+			// Check whether the candidate polynomial's hash value
+			// agrees with the hash value of the secret polynomial.
+			if (memcmp(candidateHash, hash, 20) == 0)
+			{
+				// If true, assign 'f', update the 'state' and abort
+				// the loop.
+				f.assign(candidatePolynomial);
+				state = true;
+				break;
+			}
+		}
+
+		// Free memory
+		free(a);
+		free(b);
+		free(indices);
+
+		return state;
+	}
 
 	/**
 	 * @brief
@@ -598,64 +623,69 @@ namespace thimble {
 	 * @details
 	 *            see 'FuzzyVaultTools.h'
 	 */
-	bool FuzzyVaultTools::bfdecode
-	( SmallBinaryFieldPolynomial & f ,
-	  const uint32_t *x , const uint32_t *y ,
-	  int n , int k , const uint32_t hash[5] ) {
+	bool FuzzyVaultTools::bfdecode(SmallBinaryFieldPolynomial &f,
+								   const uint32_t *x, const uint32_t *y,
+								   int n, int k, const uint32_t hash[5])
+	{
 
-		if ( n < 0 || k < 0 ) {
+		if (n < 0 || k < 0)
+		{
 			cerr << "FuzzyVaultTools::bfdecode: Bad arguments." << endl;
 			exit(EXIT_FAILURE);
 		}
 
-		if ( k > n ) {
+		if (k > n)
+		{
 			return false;
 		}
 
-        SHA sha;
+		SHA sha;
 		SmallBinaryFieldPolynomial candidatePolynomial(f.getField());
 		uint32_t candidateHash[5];
 
 		// Special case: The zero polynomial is not interpolated by any
 		// points
-		if ( k == 0 ) {
-            sha.hash(candidateHash,f.getData(),f.deg()+1);
-			return memcmp(candidateHash,hash,20)==0;
+		if (k == 0)
+		{
+			sha.hash(candidateHash, f.getData(), f.deg() + 1);
+			return memcmp(candidateHash, hash, 20) == 0;
 		}
 
 		// Keeps track whether a polynomial was yet found or not
 		bool state = false;
-		uint32_t *a , *b;
+		uint32_t *a, *b;
 
 		// Allocate memory to select 'k' random vault
 		// points
-		a = (uint32_t*)malloc( k * sizeof(uint32_t) );
-		b = (uint32_t*)malloc( k * sizeof(uint32_t) );
-		if ( a == NULL || b == NULL ) {
+		a = (uint32_t *)malloc(k * sizeof(uint32_t));
+		b = (uint32_t *)malloc(k * sizeof(uint32_t));
+		if (a == NULL || b == NULL)
+		{
 			cerr << "FuzzyVaultTools::bfdecode: Out of memory." << endl;
 			exit(EXIT_FAILURE);
 		}
 
 		// The iterator that successfully iterates through all
 		// possible states of selected 'k' out of 'n' values
-		BinomialIterator<uint32_t> it(n,k);
+		BinomialIterator<uint32_t> it(n, k);
 
-		do {
+		do
+		{
 
-			it.select(a,x);
-			it.select(b,y);
+			it.select(a, x);
+			it.select(b, y);
 
 			// Determine the interpolation polynomial of the selected
 			// vault points and ...
-			candidatePolynomial.interpolate(a,b,k);
+			candidatePolynomial.interpolate(a, b, k);
 			// ... compute its SHA-1 hash value
-            sha.hash
-            (candidateHash,
-             candidatePolynomial.getData(),candidatePolynomial.deg()+1);
+			sha.hash(candidateHash,
+					 candidatePolynomial.getData(), candidatePolynomial.deg() + 1);
 
 			// Check whether the candidate polynomial's hash value
 			// agrees with the hash value of the secret polynomial.
-			if ( memcmp(candidateHash,hash,20) == 0 ) {
+			if (memcmp(candidateHash, hash, 20) == 0)
+			{
 				// If true, assign 'f', update the 'state' and abort
 				// the loop.
 				f.assign(candidatePolynomial);
@@ -665,7 +695,7 @@ namespace thimble {
 
 			// switch to the next state of the iterator; if the iterator
 			// has already reached its final state, we are done.
-		} while( it.next() );
+		} while (it.next());
 
 		// Free memory
 		free(a);
@@ -696,16 +726,13 @@ namespace thimble {
 	 *            </li>
 	 *           </ul>
 	 */
-	long double FuzzyVaultTools::bfsecurity( int n , int t , int k ) {
+	long double FuzzyVaultTools::bfsecurity(int n, int t, int k)
+	{
 
-		BigInteger num = BigInteger::binomial(n,k);
-		BigInteger den = BigInteger::binomial(t,k);
+		BigInteger num = BigInteger::binomial(n, k);
+		BigInteger den = BigInteger::binomial(t, k);
 
 		return num.toFloat() / den.toFloat();
 	}
 
-
 }
-
-
-
