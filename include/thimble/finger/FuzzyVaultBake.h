@@ -29,6 +29,7 @@ struct BytesVault
  */
 class FuzzyVaultBake : public ProtectedMinutiaeTemplate
 {
+public:
     /**
      * @brief Construct a new Fuzzy Vault Bake object
      * Call the TemplateProtectedMinutiae constructor
