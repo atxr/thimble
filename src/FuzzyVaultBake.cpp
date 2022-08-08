@@ -98,6 +98,7 @@ bool FuzzyVaultBake::decode(SmallBinaryFieldPolynomial &f, const uint32_t *x, co
     }
 
     unordered_map<uint32_t, int> result = {};
+    pair<uint32_t, int> max = make_pair(0, -1);
 
     // Iterate at most 'maxIts' times
     for (uint64_t it = 0; it < maxIts; it++)
@@ -132,14 +133,10 @@ bool FuzzyVaultBake::decode(SmallBinaryFieldPolynomial &f, const uint32_t *x, co
             result[f0]++;
         }
 
-        // Check whether the candidate polynomial's hash value
-        // agrees with the hash value of the secret polynomial.
-        if (memcmp(candidateHash, hash, 20) == 0)
+        if (max.second == -1 || (f0 != max.first  && result[f0] > max.second))
         {
-            // If true, assign 'f', update the 'state' and abort
-            // the loop.
+            max = make_pair(f0, result[f0]);
             f.assign(candidatePolynomial);
-            state = true;
         }
     }
 
@@ -157,13 +154,14 @@ bool FuzzyVaultBake::decode(SmallBinaryFieldPolynomial &f, const uint32_t *x, co
             return p1.second > p2.second;
         });
 
-    cout << "Succeded with: " << endl
+    cout << "Top 3 occurences: " << endl
          << "   1. " << top3[0].first << " with " << top3[0].second << " occurences" << endl
          << "   2. " << top3[1].first << " with " << top3[1].second << " occurences" << endl
          << "   3. " << top3[2].first << " with " << top3[2].second << " occurences" << endl
          << "   with a total of " << maxIts << " tests." << endl;
 
-    return state;
+    const int THREASHOLD = 10; 
+    return top3[0].second > THREASHOLD * top3[1].second;
 }
 
 bool FuzzyVaultBake::open(SmallBinaryFieldPolynomial &f, const MinutiaeView &view) const
