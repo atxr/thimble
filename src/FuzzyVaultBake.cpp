@@ -47,6 +47,20 @@ uint32_t FuzzyVaultBake::getf0(MinutiaeView view)
     return f.eval(0);
 }
 
+/**
+ * @brief Decode the secret polynomial from a query
+ * Override the decode function of ProtectedMinutiaeTemplate to avoid using the stored hash of the secret polynomial
+ * Hence, in FuzzyVaultBake, no need to store this hash anymore, to avoid offline attacks on it.
+ * 
+ * @param f return the secret polynomial if the decoding is successful
+ * @param x the query set
+ * @param y the images of the locked vault
+ * @param n  number of vault points
+ * @param k size of the secret polynomial
+ * @param hash useless, not used here
+ * @param maxIts number of tests to do in the main loop
+ * @return true if the occurences of the top 1 polynomial is higher than a threashold times the top 2 occurences 
+ */
 bool FuzzyVaultBake::decode(SmallBinaryFieldPolynomial &f, const uint32_t *x, const uint32_t *y,
                             int n, int k, const uint8_t hash[20], int maxIts) const
 {
