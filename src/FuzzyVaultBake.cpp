@@ -59,7 +59,7 @@ uint32_t FuzzyVaultBake::getf0(MinutiaeView view)
  * @param k size of the secret polynomial
  * @param hash useless, not used here
  * @param maxIts number of tests to do in the main loop
- * @return true if the occurences of the top 1 polynomial is higher than a threashold times the top 2 occurences 
+ * @return true if the decode is successful, but it doesn't assure that f is the right secret polynomial 
  */
 bool FuzzyVaultBake::decode(SmallBinaryFieldPolynomial &f, const uint32_t *x, const uint32_t *y,
                             int n, int k, const uint8_t hash[20], int maxIts) const
@@ -133,11 +133,8 @@ bool FuzzyVaultBake::decode(SmallBinaryFieldPolynomial &f, const uint32_t *x, co
         // Determine the interpolation polynomial of the selected
         // vault points and ...
         candidatePolynomial.interpolate(a, b, k);
-        // ... compute its SHA-1 hash value
-        sha.hash(candidateHash,
-                 candidatePolynomial.getData(), candidatePolynomial.deg() + 1);
-
         uint32_t f0 = candidatePolynomial.eval(0);
+
         if (result.count(f0) == 0)
         {
             result[f0] = 1;
@@ -174,8 +171,7 @@ bool FuzzyVaultBake::decode(SmallBinaryFieldPolynomial &f, const uint32_t *x, co
          << "   3. " << top3[2].first << " with " << top3[2].second << " occurences" << endl
          << "   with a total of " << maxIts << " tests." << endl;
 
-    const int THREASHOLD = 10; 
-    return top3[0].second > THREASHOLD * top3[1].second;
+    return true;
 }
 
 bool FuzzyVaultBake::open(SmallBinaryFieldPolynomial &f, const MinutiaeView &view) const
