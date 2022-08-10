@@ -156,14 +156,14 @@ bool FuzzyVaultBake::decode(SmallBinaryFieldPolynomial &f, const uint32_t *x, co
     free(b);
     free(indices);
 
-    vector<pair<uint32_t, int>> top3(3);
-    partial_sort_copy(
-        begin(result), end(result),
-        top3.begin(), top3.end(),
-        [](auto &p1, auto &p2)
-        {
-            return p1.second > p2.second;
-        });
+    // vector<pair<uint32_t, int>> top3(3);
+    // partial_sort_copy(
+    //     begin(result), end(result),
+    //     top3.begin(), top3.end(),
+    //     [](auto &p1, auto &p2)
+    //     {
+    //         return p1.second > p2.second;
+    //     });
 
     // cout << "Top 3 occurences: " << endl
     //      << "   1. " << top3[0].first << " with " << top3[0].second << " occurences" << endl
