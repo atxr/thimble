@@ -167,6 +167,12 @@ bool FuzzyVaultBake::decode(SmallBinaryFieldPolynomial &f, const uint32_t *x, co
         }
     }
 
+    // If there is only a top 1 choose it (enroll)
+    if (max2.second == -1)
+    {
+        f.assign(tmp);
+    }
+
     // Free memory
     free(a);
     free(b);
@@ -181,11 +187,13 @@ bool FuzzyVaultBake::decode(SmallBinaryFieldPolynomial &f, const uint32_t *x, co
             return p1.second > p2.second;
         });
 
-    // cout << "Top 3 occurences: " << endl
-    //      << "   1. " << top3[0].first << " with " << top3[0].second << " occurences" << endl
-    //      << "   2. " << top3[1].first << " with " << top3[1].second << " occurences" << endl
-    //      << "   3. " << top3[2].first << " with " << top3[2].second << " occurences" << endl
-    //      << "   with a total of " << maxIts << " tests." << endl;
+    cout << "Top 3 occurences: " << endl
+         << "   1. " << top3[0].first << " with " << top3[0].second << " occurences" << endl
+         << "   2. " << top3[1].first << " with " << top3[1].second << " occurences" << endl
+         << "   3. " << top3[2].first << " with " << top3[2].second << " occurences" << endl
+         << "   with a total of " << maxIts << " tests." << endl;
+
+    cout << "Choose " << f.eval(0) << endl;
 
     return true;
 }
