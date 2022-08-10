@@ -51,7 +51,7 @@ uint32_t FuzzyVaultBake::getf0(MinutiaeView view)
  * @brief Decode the secret polynomial from a query
  * Override the decode function of ProtectedMinutiaeTemplate to avoid using the stored hash of the secret polynomial
  * Hence, in FuzzyVaultBake, no need to store this hash anymore, to avoid offline attacks on it.
- * 
+ *
  * @param f return the secret polynomial if the decoding is successful
  * @param x the query set
  * @param y the images of the locked vault
@@ -59,7 +59,7 @@ uint32_t FuzzyVaultBake::getf0(MinutiaeView view)
  * @param k size of the secret polynomial
  * @param hash useless, not used here
  * @param maxIts number of tests to do in the main loop
- * @return true if the decode is successful, but it doesn't assure that f is the right secret polynomial 
+ * @return true if the decode is successful, but it doesn't assure that f is the right secret polynomial
  */
 bool FuzzyVaultBake::decode(SmallBinaryFieldPolynomial &f, const uint32_t *x, const uint32_t *y,
                             int n, int k, const uint8_t hash[20], int maxIts) const
@@ -144,7 +144,7 @@ bool FuzzyVaultBake::decode(SmallBinaryFieldPolynomial &f, const uint32_t *x, co
             result[f0]++;
         }
 
-        if (max.second == -1 || (f0 != max.first  && result[f0] > max.second))
+        if (max.second == -1 || (f0 != max.first && result[f0] > max.second))
         {
             max = make_pair(f0, result[f0]);
             f.assign(candidatePolynomial);
@@ -165,11 +165,11 @@ bool FuzzyVaultBake::decode(SmallBinaryFieldPolynomial &f, const uint32_t *x, co
             return p1.second > p2.second;
         });
 
-    cout << "Top 3 occurences: " << endl
-         << "   1. " << top3[0].first << " with " << top3[0].second << " occurences" << endl
-         << "   2. " << top3[1].first << " with " << top3[1].second << " occurences" << endl
-         << "   3. " << top3[2].first << " with " << top3[2].second << " occurences" << endl
-         << "   with a total of " << maxIts << " tests." << endl;
+    // cout << "Top 3 occurences: " << endl
+    //      << "   1. " << top3[0].first << " with " << top3[0].second << " occurences" << endl
+    //      << "   2. " << top3[1].first << " with " << top3[1].second << " occurences" << endl
+    //      << "   3. " << top3[2].first << " with " << top3[2].second << " occurences" << endl
+    //      << "   with a total of " << maxIts << " tests." << endl;
 
     return true;
 }
