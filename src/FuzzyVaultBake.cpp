@@ -114,8 +114,8 @@ bool FuzzyVaultBake::decode(SmallBinaryFieldPolynomial &f, const uint32_t *x, co
     unordered_map<uint32_t, int> result = {};
     pair<uint32_t, int> max = make_pair(0, -1);
     pair<uint32_t, int> max2 = make_pair(0, -1);
-    SmallBinaryFieldPolynomial tmp(f.getField());
-    tmp.ensureCapacity(k);
+    SmallBinaryFieldPolynomial f1(f.getField());
+    f1.ensureCapacity(k);
 
     // Iterate at most 'maxIts' times
     for (uint64_t it = 0; it < maxIts; it++)
@@ -147,20 +147,14 @@ bool FuzzyVaultBake::decode(SmallBinaryFieldPolynomial &f, const uint32_t *x, co
             result[f0]++;
         }
 
-        if (max.second == -1)
+        if (f0 != max.first && result[f0] > max.second)
         {
             max2 = make_pair(max.first, max.second);
             max = make_pair(f0, result[f0]);
-            tmp.assign(candidatePolynomial);
+            f.assign(f1);
+            f1.assign(candidatePolynomial);
         }
-        else if (f0 != max.first && result[f0] > max.second)
-        {
-            max2 = make_pair(max.first, max.second);
-            max = make_pair(f0, result[f0]);
-            f.assign(tmp);
-            tmp.assign(candidatePolynomial);
-        }
-        else if (f0 != max.first && f0 != max2.first && result[f0] > max2.second)
+        else if (f0 != max.first && result[f0] > max2.second)
         {
             max2 = make_pair(f0, result[f0]);
             f.assign(candidatePolynomial);
@@ -170,7 +164,7 @@ bool FuzzyVaultBake::decode(SmallBinaryFieldPolynomial &f, const uint32_t *x, co
     // If there is only a top 1 choose it (enroll)
     if (max2.second == -1)
     {
-        f.assign(tmp);
+        f.assign(f1);
     }
 
     // Free memory
@@ -193,7 +187,7 @@ bool FuzzyVaultBake::decode(SmallBinaryFieldPolynomial &f, const uint32_t *x, co
          << "   3. " << top3[2].first << " with " << top3[2].second << " occurences" << endl
          << "   with a total of " << maxIts << " tests." << endl;
 
-    cout << "Choose " << f.eval(0) << endl;
+    cout << "Choose " << f.eval(0) << " with " << result[f.eval(0)] << endl;
 
     return true;
 }
