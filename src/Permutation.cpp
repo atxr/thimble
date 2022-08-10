@@ -241,8 +241,8 @@ namespace thimble {
 	int Permutation::eval( int x ) const {
 
 		if ( x < 0 || x >= this->n ) {
-            cerr << "Permutation::eval: invalid argument." << endl;
-			exit(EXIT_FAILURE);
+            // Permutation::eval: invalid argument
+            throw 1;
 		}
 
 		return this->data[x];
